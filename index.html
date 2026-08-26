@@ -3,153 +3,738 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profil Anggota & Game</title>
+  <title>KELOMPOK 1 // STORY MODE HUB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
-    * {
+    /* --- RESET & VARIABLES --- */
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+      --bg-dark: #050811;
+      --card-bg: rgba(11, 19, 36, 0.75);
+      --card-border-locked: rgba(255, 51, 102, 0.25);
+      --card-border-unlocked: rgba(0, 243, 255, 0.4);
+      --primary-cyan: #00f3ff;
+      --primary-green: #00ff88;
+      --primary-red: #ff3366;
+      --accent-gold: #ffbe0b;
+      --text-main: #e2e8f0;
+      --text-muted: #64748b;
+      --font-heading: 'Orbitron', sans-serif;
+      --font-sub: 'Rajdhani', sans-serif;
+      --font-code: 'Share Tech Mono', monospace;
     }
 
     body {
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: #f8fafc;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sub);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 243, 255, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(255, 51, 102, 0.07) 0%, transparent 45%),
+        linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 35px 35px, 35px 35px;
       padding: 40px 20px;
     }
 
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 8px;
+    /* Cyber Scanlines Effect */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+      background-size: 100% 4px;
+      z-index: 999;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* --- HEADER SECTION --- */
+    header {
       text-align: center;
-      letter-spacing: 1px;
+      margin-bottom: 45px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 243, 255, 0.08);
+      border: 1px solid var(--primary-cyan);
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      color: var(--primary-cyan);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.15);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--primary-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary-green);
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.3; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.3); }
+    }
+
+    h1.title {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 40%, var(--primary-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 25px rgba(0, 243, 255, 0.25);
+      margin-bottom: 10px;
     }
 
     p.subtitle {
+      font-size: 1.1rem;
       color: #94a3b8;
-      margin-bottom: 40px;
-      text-align: center;
-      font-size: 0.95rem;
+      letter-spacing: 1.2px;
+      max-width: 650px;
+      margin: 0 auto;
     }
 
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 24px;
-      max-width: 1000px;
-      width: 100%;
-    }
-
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    /* --- SECTION LABEL --- */
+    .section-label {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      color: var(--primary-cyan);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
       display: flex;
-      flex-direction: column;
       align-items: center;
+      gap: 15px;
     }
 
-    .card:hover {
-      transform: translateY(-8px);
-      border-color: #3b82f6;
-      box-shadow: 0 15px 30px rgba(59, 130, 246, 0.25);
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--primary-cyan), transparent);
     }
 
-    .avatar {
-      width: 80px;
-      height: 80px;
+    /* --- KETUA KELOMPOK (NO GAME, COMMANDER CARD) --- */
+    .leader-card {
+      background: linear-gradient(135deg, rgba(255, 190, 11, 0.08) 0%, rgba(11, 19, 36, 0.9) 100%);
+      border: 1px solid rgba(255, 190, 11, 0.4);
+      border-radius: 16px;
+      padding: 28px 30px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 50px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 190, 11, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .leader-card::before {
+      content: 'COMMANDER';
+      position: absolute;
+      right: 20px;
+      top: -10px;
+      font-family: var(--font-heading);
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: rgba(255, 190, 11, 0.03);
+      letter-spacing: 4px;
+      pointer-events: none;
+    }
+
+    .leader-avatar {
+      width: 75px;
+      height: 75px;
+      min-width: 75px;
       border-radius: 50%;
-      background: #334155;
+      background: radial-gradient(circle, rgba(255, 190, 11, 0.25), rgba(11, 19, 36, 1));
+      border: 2px solid var(--accent-gold);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 2rem;
-      margin-bottom: 16px;
-      border: 3px solid #3b82f6;
+      box-shadow: 0 0 20px rgba(255, 190, 11, 0.3);
     }
 
-    .card h3 {
-      font-size: 1.25rem;
-      margin-bottom: 6px;
+    .leader-info h2 {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
       color: #ffffff;
+      margin-bottom: 4px;
     }
 
-    .card p {
-      color: #94a3b8;
-      font-size: 0.85rem;
-      margin-bottom: 20px;
-    }
-
-    .btn-game {
-      margin-top: auto;
+    .leader-info .badge-leader {
       display: inline-block;
-      width: 100%;
-      padding: 10px 16px;
-      background: #3b82f6;
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border-radius: 8px;
-      transition: background 0.2s ease;
+      font-family: var(--font-code);
+      background: rgba(255, 190, 11, 0.15);
+      color: var(--accent-gold);
+      border: 1px solid var(--accent-gold);
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
-    .btn-game:hover {
-      background: #2563eb;
+    .leader-info p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    /* --- STORY STAGES LIST --- */
+    .stages-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 50px;
+    }
+
+    .stage-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border-locked);
+      border-radius: 16px;
+      padding: 26px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* UNLOCKED STAGE STYLING */
+    .stage-card.unlocked {
+      border-color: var(--card-border-unlocked);
+      box-shadow: 0 10px 30px rgba(0, 243, 255, 0.15);
+    }
+
+    .stage-card.unlocked:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary-cyan);
+      box-shadow: 0 15px 35px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0, 243, 255, 0.08);
+    }
+
+    /* LOCKED STAGE STYLING */
+    .stage-card.locked {
+      opacity: 0.75;
+      background: rgba(8, 13, 24, 0.6);
+      filter: grayscale(0.3);
+    }
+
+    .stage-card.locked:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary-red);
+      opacity: 0.95;
+      box-shadow: 0 10px 25px rgba(255, 51, 102, 0.2);
+    }
+
+    .stage-tag {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      letter-spacing: 1.5px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .unlocked .stage-tag {
+      background: rgba(0, 255, 136, 0.12);
+      color: var(--primary-green);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .locked .stage-tag {
+      background: rgba(255, 51, 102, 0.12);
+      color: var(--primary-red);
+      border: 1px solid rgba(255, 51, 102, 0.3);
+    }
+
+    .avatar-box {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .unlocked .avatar-box {
+      background: radial-gradient(circle, rgba(0, 243, 255, 0.2), rgba(11, 19, 36, 1));
+      border: 2px solid var(--primary-cyan);
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    }
+
+    .locked .avatar-box {
+      background: radial-gradient(circle, rgba(255, 51, 102, 0.15), rgba(8, 13, 24, 1));
+      border: 2px solid var(--primary-red);
+      box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
+    }
+
+    .lock-overlay {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      background: var(--bg-dark);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      border: 1px solid var(--text-muted);
+    }
+
+    .unlocked .lock-overlay {
+      border-color: var(--primary-green);
+      color: var(--primary-green);
+    }
+
+    .locked .lock-overlay {
+      border-color: var(--primary-red);
+      color: var(--primary-red);
+    }
+
+    .stage-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .stage-card p.desc {
+      font-size: 0.85rem;
+      color: #8899ac;
+      margin-bottom: 22px;
+      line-height: 1.4;
+    }
+
+    /* BUTTONS */
+    .btn-action {
+      margin-top: auto;
+      width: 100%;
+      padding: 12px;
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .btn-play {
+      background: linear-gradient(135deg, rgba(0, 243, 255, 0.25), rgba(0, 243, 255, 0.05));
+      border: 1px solid var(--primary-cyan);
+      color: var(--primary-cyan);
+    }
+
+    .btn-play:hover {
+      background: var(--primary-cyan);
+      color: #000000;
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+    }
+
+    .btn-locked {
+      background: linear-gradient(135deg, rgba(255, 51, 102, 0.15), rgba(255, 51, 102, 0.05));
+      border: 1px solid var(--primary-red);
+      color: var(--primary-red);
+    }
+
+    .btn-locked:hover {
+      background: var(--primary-red);
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+    }
+
+    .btn-completed {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid var(--primary-green);
+      color: var(--primary-green);
+    }
+
+    /* --- MODAL POPUP --- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: #0d1526;
+      border: 1px solid var(--primary-cyan);
+      border-radius: 16px;
+      max-width: 460px;
+      width: 100%;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 243, 255, 0.25);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    .modal-backdrop.active .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .modal-box h3 {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      color: #ffffff;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .modal-box p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-modal-yes {
+      flex: 1;
+      padding: 12px;
+      background: var(--primary-cyan);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-modal-yes:hover {
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .btn-modal-no {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-modal-no:hover {
+      color: #ffffff;
+      border-color: #64748b;
+    }
+
+    /* --- FOOTER & RESET BUTTON --- */
+    footer {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+    }
+
+    .btn-reset {
+      margin-top: 12px;
+      background: none;
+      border: 1px dashed #334155;
+      color: #64748b;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      color: var(--primary-red);
+      border-color: var(--primary-red);
+    }
+
+    @media (max-width: 600px) {
+      .leader-card {
+        flex-direction: column;
+        text-align: center;
+      }
+      .modal-actions {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h1>SQUAD GAME KAMI</h1>
-  <p class="subtitle">Pilih anggota di bawah untuk masuk ke game masing-masing</p>
+  <div class="wrapper">
+    <!-- HEADER -->
+    <header>
+      <div class="status-badge">
+        <span class="pulse-dot"></span> STORY CAMPAIGN // SQUAD 1
+      </div>
+      <h1 class="title">WEBSITE KELOMPOK 1</h1>
+      <p class="subtitle">Selesaikan Game Story secara berurutan dari Stage 1 hingga Stage 4 untuk membuka seluruh misi!</p>
+    </header>
 
-  <div class="container">
-    <!-- Anggota 1 -->
-    <div class="card">
-      <div class="avatar">🎮</div>
-      <h3>Anggota 1</h3>
-      <p>Player / Nickname</p>
-      <!-- Ganti href di bawah dengan link game Anggota 1 -->
-      <a href="https://example.com/game1" class="btn-game" target="_blank">Buka Game</a>
+    <!-- KETUA KELOMPOK (COMMANDER / OVERSEER) -->
+    <div class="section-label">COMMANDER KELOMPOK</div>
+    <div class="leader-card">
+      <div class="leader-avatar">👑</div>
+      <div class="leader-info">
+        <span class="badge-leader">PROJECT OVERSEER / KETUA</span>
+        <h2>Muhammad Khizni Alghifari</h2>
+        <p>Pemimpin Squad Kelompok 1 - Pengawas Jalannya Misi & Sistem Story Campaign.</p>
+      </div>
     </div>
 
-    <!-- Anggota 2 -->
-    <div class="card">
-      <div class="avatar">🕹️</div>
-      <h3>Anggota 2</h3>
-      <p>Player / Nickname</p>
-      <!-- Ganti href di bawah dengan link game Anggota 2 -->
-      <a href="https://example.com/game2" class="btn-game" target="_blank">Buka Game</a>
+    <!-- STORY MISSIONS / STAGES -->
+    <div class="section-label">STORY CAMPAIGN STAGES</div>
+    <div class="stages-container" id="stagesContainer">
+      
+      <!-- STAGE 1: MEIZAM -->
+      <div class="stage-card unlocked" id="card-stage-1">
+        <span class="stage-tag">STAGE 01</span>
+        <div class="avatar-box">
+          ⚡
+          <div class="lock-overlay" id="icon-stage-1">🔓</div>
+        </div>
+        <h3>Meizam Ahmad Fariz</h3>
+        <p class="desc">Misi Pertama: Awal mula petualangan story Kelompok 1.</p>
+        <a href="game_meizam.html" target="_blank" class="btn-action btn-play" id="btn-stage-1" onclick="completeStage(1)">
+          <span>MAINKAN STAGE 1</span> 🎮
+        </a>
+      </div>
+
+      <!-- STAGE 2: AZFAR -->
+      <div class="stage-card locked" id="card-stage-2">
+        <span class="stage-tag">STAGE 02</span>
+        <div class="avatar-box">
+          ⚔️
+          <div class="lock-overlay" id="icon-stage-2">🔒</div>
+        </div>
+        <h3>Azfar Tsaqif Alfarezel</h3>
+        <p class="desc">Misi Kedua: Terbuka setelah kamu menyelesaikan Stage 1.</p>
+        <button class="btn-action btn-locked" id="btn-stage-2" onclick="handleStageClick(2)">
+          <span>TERKUNCI</span> 🔒
+        </button>
+      </div>
+
+      <!-- STAGE 3: ALIF (RAISYA) -->
+      <div class="stage-card locked" id="card-stage-3">
+        <span class="stage-tag">STAGE 03</span>
+        <div class="avatar-box">
+          🎯
+          <div class="lock-overlay" id="icon-stage-3">🔒</div>
+        </div>
+        <h3>Raisya Naufal Alif</h3>
+        <p class="desc">Misi Ketiga: Terbuka setelah kamu menyelesaikan Stage 2.</p>
+        <button class="btn-action btn-locked" id="btn-stage-3" onclick="handleStageClick(3)">
+          <span>TERKUNCI</span> 🔒
+        </button>
+      </div>
+
+      <!-- STAGE 4: FAIZ -->
+      <div class="stage-card locked" id="card-stage-4">
+        <span class="stage-tag">STAGE 04</span>
+        <div class="avatar-box">
+          🚀
+          <div class="lock-overlay" id="icon-stage-4">🔒</div>
+        </div>
+        <h3>Faiz Mubarak Athailah</h3>
+        <p class="desc">Misi Final: Puncak petualangan story Kelompok 1.</p>
+        <button class="btn-action btn-locked" id="btn-stage-4" onclick="handleStageClick(4)">
+          <span>TERKUNCI</span> 🔒
+        </button>
+      </div>
+
     </div>
 
-    <!-- Anggota 3 -->
-    <div class="card">
-      <div class="avatar">🎯</div>
-      <h3>Anggota 3</h3>
-      <p>Player / Nickname</p>
-      <!-- Ganti href di bawah dengan link game Anggota 3 -->
-      <a href="https://example.com/game3" class="btn-game" target="_blank">Buka Game</a>
-    </div>
+    <!-- FOOTER -->
+    <footer>
+      <p>&copy; 2026 KELOMPOK 1 // STORY HUB SYSTEM</p>
+      <button class="btn-reset" onclick="resetProgress()">🔄 Reset Progress Story</button>
+    </footer>
+  </div>
 
-    <!-- Anggota 4 -->
-    <div class="card">
-      <div class="avatar">👾</div>
-      <h3>Anggota 4</h3>
-      <p>Player / Nickname</p>
-      <!-- Ganti href di bawah dengan link game Anggota 4 -->
-      <a href="https://example.com/game4" class="btn-game" target="_blank">Buka Game</a>
+  <!-- MODAL QUESTION POPUP -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-box">
+      <span class="modal-icon">🔐</span>
+      <h3 id="modalTitle">KONFIRMASI STAGE</h3>
+      <p id="modalQuestion">Apakah kamu sudah menyelesaikan Stage 1 (Meizam)?</p>
+      <div class="modal-actions">
+        <button class="btn-modal-yes" id="btnModalYes">YA, SUDAH!</button>
+        <button class="btn-modal-no" onclick="closeModal()">BELUM</button>
+      </div>
     </div>
   </div>
 
+  <script>
+    // Data Konfigurasi Stage
+    const stagesData = {
+      1: { name: "Meizam Ahmad Fariz", link: "game_meizam.html" },
+      2: { name: "Azfar Tsaqif Alfarezel", link: "game_azfar.html" },
+      3: { name: "Raisya Naufal Alif", link: "game_raisya.html" },
+      4: { name: "Faiz Mubarak Athailah", link: "game_faiz.html" }
+    };
+
+    // Ambil level unlocked dari localStorage (Default Stage 1 terbuka)
+    let currentUnlockedStage = parseInt(localStorage.getItem('k1_unlocked_stage')) || 1;
+    let targetStageToUnlock = null;
+
+    // Inisialisasi Tampilan
+    function updateUI() {
+      for (let i = 1; i <= 4; i++) {
+        const card = document.getElementById(`card-stage-${i}`);
+        const icon = document.getElementById(`icon-stage-${i}`);
+        const btn = document.getElementById(`btn-stage-${i}`);
+
+        if (i <= currentUnlockedStage) {
+          // BUKAN GEMBOK (UNLOCKED)
+          card.className = "stage-card unlocked";
+          icon.textContent = "🔓";
+
+          // Ubah tombol jadi link aktif jika belum diganti
+          if (btn.tagName === "BUTTON") {
+            const newLink = document.createElement("a");
+            newLink.id = `btn-stage-${i}`;
+            newLink.className = "btn-action btn-play";
+            newLink.href = stagesData[i].link;
+            newLink.target = "_blank";
+            newLink.innerHTML = `<span>MAINKAN STAGE ${i}</span> 🎮`;
+            btn.parentNode.replaceChild(newLink, btn);
+          }
+        } else {
+          // GEMBOK (LOCKED)
+          card.className = "stage-card locked";
+          icon.textContent = "🔒";
+        }
+      }
+    }
+
+    // Ketika Stage yang Terkunci Dikitik
+    function handleStageClick(stageNum) {
+      if (stageNum > currentUnlockedStage) {
+        const prevStageNum = stageNum - 1;
+        const prevMemberName = stagesData[prevStageNum].name;
+
+        // Buka Modal Pertanyaan
+        targetStageToUnlock = stageNum;
+        document.getElementById('modalTitle').textContent = `STAGE ${stageNum} TERKUNCI 🔒`;
+        document.getElementById('modalQuestion').innerHTML = `Apakah kamu sudah menyelesaikan <strong>Stage ${prevStageNum} (${prevMemberName})</strong>?`;
+        
+        document.getElementById('modalBackdrop').classList.add('active');
+      }
+    }
+
+    // Modal Action: YA, SUDAH!
+    document.getElementById('btnModalYes').addEventListener('click', function() {
+      if (targetStageToUnlock) {
+        currentUnlockedStage = targetStageToUnlock;
+        localStorage.setItem('k1_unlocked_stage', currentUnlockedStage);
+        updateUI();
+        closeModal();
+
+        // Otomatis buka game stage yang baru saja di-unlock
+        window.open(stagesData[targetStageToUnlock].link, '_blank');
+      }
+    });
+
+    function closeModal() {
+      document.getElementById('modalBackdrop').classList.remove('active');
+      targetStageToUnlock = null;
+    }
+
+    // Fitur Reset jika ingin coba dari awal
+    function resetProgress() {
+      if (confirm("Apakah kamu yakin ingin mereset progress story ke Stage 1?")) {
+        localStorage.setItem('k1_unlocked_stage', 1);
+        currentUnlockedStage = 1;
+        location.reload();
+      }
+    }
+
+    // Jalankan UI update saat halaman dimuat
+    updateUI();
+  </script>
 </body>
 </html>
