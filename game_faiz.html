@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Clone Engine</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        canvas { background: linear-gradient(to bottom, #70c5ce 0%, #def2f4 100%); box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 4px solid #fff; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- 1. Encoded SVG Sprites ---
+        // We use data URIs so you don't need external image files.
+        const birdSvg = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='24'%3E%3Cpath d='M17,2 C25,2 32,8 32,15 C32,20 25,22 17,22 C9,22 2,20 2,15 C2,8 9,2 17,2 Z' fill='%23FFC107' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='24' cy='10' r='4' fill='%23FFF' stroke='%23000' stroke-width='1'/%3E%3Ccircle cx='25' cy='10' r='1.5' fill='%23000'/%3E%3Cpath d='M30,14 L34,16 L30,18 Z' fill='%23F44336' stroke='%23000' stroke-width='1'/%3E%3Cpath d='M2,12 L8,8 L12,14 Z' fill='%23FFF' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E";
+        
+        const birdImg = new Image();
+        birdImg.src = birdSvg;
+
+        // --- 2. Game Variables ---
+        let frames = 0;
+        let gameState = 'START'; // START, PLAYING, GAMEOVER
+        let score = 0;
+        let bestScore = localStorage.getItem('flappyBest') || 0;
+
+        // --- 3. Entities ---
+        const bird = {
+            x: 50, y: 150, w: 34, h: 24,
+            velocity: 0, gravity: 0.25, jump: -5.5,
+            draw: function() {
+                ctx.save();
+                ctx.translate(this.x + this.w/2, this.y + this.h/2);
+                // Rotate bird based on velocity
+                let rotation = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, (this.velocity * 0.1)));
+                ctx.rotate(rotation);
+                ctx.drawImage(birdImg, -this.w/2, -this.h/2);
+                ctx.restore();
+            },
+            update: function() {
+                this.velocity += this.gravity;
+                this.y += this.velocity;
+                
+                // Floor collision
+                if (this.y + this.h >= canvas.height) {
+                    this.y = canvas.height - this.h;
+                    gameState = 'GAMEOVER';
+                }
+                // Ceiling collision
+                if (this.y <= 0) {
+                    this.y = 0;
+                    this.velocity = 0;
+                }
+            },
+            flap: function() {
+                this.velocity = this.jump;
+            }
+        };
+
+        const pipes = {
+            items: [], width: 60, gap: 140, dx: 2.5,
+            draw: function() {
+                for (let i = 0; i < this.items.length; i++) {
+                    let p = this.items[i];
+                    // Draw complex looking pipes with gradients
+                    let grad = ctx.createLinearGradient(p.x, 0, p.x + this.width, 0);
+                    grad.addColorStop(0, '#557d19');
+                    grad.addColorStop(0.5, '#9ee33c');
+                    grad.addColorStop(1, '#557d19');
+                    ctx.fillStyle = grad;
+                    
+                    // Top pipe
+                    ctx.fillRect(p.x, 0, this.width, p.top);
+                    ctx.strokeRect(p.x - 2, p.top - 20, this.width + 4, 20); // Pipe cap
+                    
+                    // Bottom pipe
+                    ctx.fillRect(p.x, canvas.height - p.bottom, this.width, p.bottom);
+                    ctx.strokeRect(p.x - 2, canvas.height - p.bottom, this.width + 4, 20); // Pipe cap
+                }
+            },
+            update: function() {
+                // Add new pipes every 100 frames
+                if (frames % 100 === 0) {
+                    let minHeight = 50;
+                    let maxPos = canvas.height - minHeight - this.gap;
+                    let topHeight = Math.max(minHeight, Math.random() * maxPos);
+                    
+                    this.items.push({
+                        x: canvas.width,
+                        top: topHeight,
+                        bottom: canvas.height - (topHeight + this.gap),
+                        passed: false
+                    });
+                }
+
+                for (let i = 0; i < this.items.length; i++) {
+                    let p = this.items[i];
+                    p.x -= this.dx;
+
+                    // Collision Detection (AABB)
+                    if (bird.x + bird.w > p.x && bird.x < p.x + this.width &&
+                       (bird.y < p.top || bird.y + bird.h > canvas.height - p.bottom)) {
+                        gameState = 'GAMEOVER';
+                    }
+
+                    // Score update
+                    if (p.x + this.width < bird.x && !p.passed) {
+                        score++;
+                        p.passed = true;
+                    }
+
+                    // Remove off-screen pipes
+                    if (p.x + this.width < 0) {
+                        this.items.shift();
+                        i--;
+                    }
+                }
+            },
+            reset: function() { this.items = []; }
+        };
+
+        // --- 4. Game Loop & UI ---
+        function drawUI() {
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            
+            if (gameState === 'START') {
+                ctx.font = '30px Arial';
+                ctx.fillText('Click to Start', 110, 300);
+                ctx.strokeText('Click to Start', 110, 300);
+            } else if (gameState === 'GAMEOVER') {
+                ctx.font = '40px Arial';
+                ctx.fillText('Game Over', 100, 250);
+                ctx.strokeText('Game Over', 100, 250);
+                
+                ctx.font = '25px Arial';
+                ctx.fillText(`Score: ${score}`, 145, 300);
+                ctx.strokeText(`Score: ${score}`, 145, 300);
+                
+                ctx.fillText(`Best: ${bestScore}`, 145, 340);
+                ctx.strokeText(`Best: ${bestScore}`, 145, 340);
+                
+                ctx.font = '20px Arial';
+                ctx.fillText('Click to Restart', 130, 400);
+                ctx.strokeText('Click to Restart', 130, 400);
+            } else {
+                ctx.font = '40px Arial';
+                ctx.fillText(score, canvas.width/2 - 15, 60);
+                ctx.strokeText(score, canvas.width/2 - 15, 60);
+            }
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (gameState === 'PLAYING') {
+                bird.update();
+                pipes.update();
+            }
+            
+            pipes.draw();
+            bird.draw();
+            drawUI();
+            
+            frames++;
+            requestAnimationFrame(loop);
+        }
+
+        // --- 5. Controls ---
+        function handleInput() {
+            if (gameState === 'START') {
+                gameState = 'PLAYING';
+                bird.flap();
+            } else if (gameState === 'PLAYING') {
+                bird.flap();
+            } else if (gameState === 'GAMEOVER') {
+                if (score > bestScore) {
+                    bestScore = score;
+                    localStorage.setItem('flappyBest', bestScore);
+                }
+                score = 0;
+                frames = 0;
+                bird.y = 150;
+                bird.velocity = 0;
+                pipes.reset();
+                gameState = 'START';
+            }
+        }
+
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleInput(); });
+        canvas.addEventListener('mousedown', handleInput);
+
+        // Start the game loop once the bird image loads
+        birdImg.onload = loop;
+    </script>
+</body>
+</html>
