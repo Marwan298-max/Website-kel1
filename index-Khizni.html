@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hub Game — Kelompok 1</title>
+  <meta name="description" content="Showcase kumpulan game buatan anggota Kelompok 1. Semua bisa dimainkan langsung dari browser.">
+  <meta name="theme-color" content="#08090c">
+
+  <!--
+    ============================================
+    HUB GAME — KELOMPOK 1
+    Dibuat: Khizni 
+    Catatan buat yang mau edit:
+    - Daftar game ada di bagian "DAFTAR GAME" (cari aja pakai ctrl+f)
+    - Kalau ganti nama game, jangan lupa ganti juga atribut href-nya
+    ============================================
+  -->
+
+  <!-- Favicon kecil, biar tab browser nggak polos -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308090c'/%3E%3Ctext x='32' y='42' font-family='Arial' font-size='24' font-weight='700' fill='%23e2b86b' text-anchor='middle'%3EK1%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       HUB GAME KELOMPOK 1 — stylesheet
+       Tema  : dark minimalis + aksen emas (cuma satu warna aksen, jangan ditambah)
+       Struktur CSS dibagi per nomor section, biar gampang dicari:
+
+       00. Variabel & reset
+       01. Base & tipografi
+       02. Utilitas kecil (wrap, eyebrow, chip, tombol)
+       03. Preloader
+       04. Progress bar & navigasi
+       05. Hero
+       06. Ticker nama anggota
+       07. Kartu ketua
+       08. Section heading
+       09. Kartu game
+       10. Section tentang
+       11. Section cara memainkan
+       12. Footer
+       13. Tombol kembali ke atas
+       14. Animasi & reveal
+       15. Responsive
+       16. Aksesibilitas & reduced motion
+       ========================================================================== */
+
+    /* --------------------------------------------------------------------------
+       00. Variabel & reset
+       -------------------------------------------------------------------------- */
+    :root{
+      --bg:          #08090c;
+      --bg-2:        #0c0e13;
+      --surface:     rgba(255, 255, 255, 0.024);
+      --surface-2:   rgba(255, 255, 255, 0.05);
+      --border:      rgba(255, 255, 255, 0.07);
+      --border-2:    rgba(255, 255, 255, 0.14);
+      --gold:        #e2b86b;
+      --gold-soft:   rgba(226, 184, 107, 0.12);
+      --gold-line:   rgba(226, 184, 107, 0.32);
+      --gold-dim:    rgba(226, 184, 107, 0.45);
+      --text:        #f2f3f5;
+      --text-2:      #a4a9b1;
+      --text-3:      #686e78;
+      --font-head:   'Syne', sans-serif;
+      --font-body:   'Plus Jakarta Sans', sans-serif;
+      --ease:        cubic-bezier(0.22, 1, 0.36, 1);
+      --radius:      18px;
+      --container:   1080px;
+      --nav-h:       68px;
+    }
+
+    *,
+    *::before,
+    *::after{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* --------------------------------------------------------------------------
+       01. Base & tipografi
+       -------------------------------------------------------------------------- */
+    html{
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body{
+      font-family: var(--font-body);
+      color: var(--text);
+      line-height: 1.65;
+      background:
+        radial-gradient(ellipse 90% 50% at 50% -10%, rgba(226, 184, 107, 0.07), transparent 60%),
+        var(--bg);
+      background-attachment: fixed;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grain super tipis, kasih tekstur tapi nyaris nggak kelihatan.
+       Kalau rasanya berat di HP, blok ini boleh dihapus. */
+    body::before{
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 990;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    h1, h2, h3, h4{
+      font-family: var(--font-head);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    p{
+      font-weight: 400;
+    }
+
+    a{
+      color: inherit;
+      text-decoration: none;
+    }
+
+    ul{
+      list-style: none;
+    }
+
+    button{
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    img, svg{
+      display: block;
+      max-width: 100%;
+    }
+
+    section[id]{
+      scroll-margin-top: calc(var(--nav-h) + 24px);
+    }
+
+    ::selection{
+      background: var(--gold);
+      color: #0b0b0d;
+    }
+
+    /* Scrollbar biar nyatu sama tema */
+    ::-webkit-scrollbar{
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track{
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb{
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 99px;
+      border: 2px solid var(--bg);
+    }
+    ::-webkit-scrollbar-thumb:hover{
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    :focus-visible{
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    /* --------------------------------------------------------------------------
+       02. Utilitas kecil
+       -------------------------------------------------------------------------- */
+    .wrap{
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section{
+      padding: 72px 0;
+    }
+
+    /* Label kecil di atas judul section */
+    .eyebrow{
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+
+    .chip{
+      display: inline-block;
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      border: 1px solid var(--border);
+      padding: 4px 11px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+
+    .muted{
+      color: var(--text-2);
+    }
+
+    .tiny{
+      font-size: 0.8rem;
+    }
+
+    /* --------------------------------------------------------------------------
+       03. Preloader
+       Layar pembuka singkat. Hilang otomatis setelah halaman ke-load.
+       -------------------------------------------------------------------------- */
+    .preloader{
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg);
+      display: grid;
+      place-items: center;
+      transition: opacity 0.55s ease, visibility 0.55s ease;
+    }
+    .preloader.done{
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .pre-inner{
+      text-align: center;
+    }
+
+    .pre-logo{
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 1.9rem;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+    }
+    .pre-logo em{
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .pre-line{
+      position: relative;
+      width: 130px;
+      height: 1px;
+      margin: 20px auto 14px;
+      background: var(--border-2);
+      overflow: hidden;
+    }
+    .pre-line::after{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: translateX(-101%);
+      animation: pre-slide 1.1s var(--ease) forwards;
+    }
+    @keyframes pre-slide{
+      to{ transform: translateX(0); }
+    }
+
+    .pre-label{
+      font-size: 0.64rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* --------------------------------------------------------------------------
+       04. Progress bar & navigasi
+       -------------------------------------------------------------------------- */
+    .progress{
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      width: 0;
+      background: var(--gold);
+      z-index: 950;
+    }
+
+    .nav{
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 900;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      transition: background 0.35s ease, border-color 0.35s ease;
+      border-bottom: 1px solid transparent;
+    }
+    .nav.scrolled{
+      background: rgba(8, 9, 12, 0.85);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      border-bottom-color: var(--border);
+    }
+
+    .nav-inner{
+      width: 100%;
+      max-width: var(--container);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    /* Logo kiri */
+    .brand{
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      flex-shrink: 0;
+    }
+    .brand-mark{
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border-2);
+      border-radius: 10px;
+      background: var(--surface);
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 0.72rem;
+      color: var(--gold);
+    }
+    .brand-name{
+      font-weight: 700;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+    }
+    .brand-name span{
+      color: var(--text-3);
+      font-weight: 500;
+    }
+
+    /* Link tengah */
+    .nav-links{
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-links a{
+      display: block;
+      padding: 8px 15px;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-2);
+      transition: color 0.25s ease, background 0.25s ease;
+    }
+    .nav-links a:hover{
+      color: var(--text);
+      background: var(--surface-2);
+    }
+    .nav-links a.active{
+      color: var(--gold);
+      background: var(--gold-soft);
+    }
+
+    /* Tag kanan */
+    .nav-tag{
+      flex-shrink: 0;
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      border: 1px solid var(--border);
+      padding: 6px 13px;
+      border-radius: 99px;
+    }
+
+    /* Tombol hamburger (muncul di layar kecil) */
+    .nav-burger{
+      display: none;
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border-2);
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .nav-burger span{
+      position: absolute;
+      top: 50%;
+      left: 11px;
+      right: 11px;
+      height: 2px;
+      margin-top: -1px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.3s var(--ease);
+    }
+    .nav-burger span:nth-child(1){
+      transform: translateY(-4px);
+    }
+    .nav-burger span:nth-child(2){
+      transform: translateY(4px);
+    }
+    .nav-burger.active span:nth-child(1){
+      transform: rotate(45deg);
+    }
+    .nav-burger.active span:nth-child(2){
+      transform: rotate(-45deg);
+    }
+
+    /* --------------------------------------------------------------------------
+       05. Hero
+       -------------------------------------------------------------------------- */
+    .hero{
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: calc(var(--nav-h) + 40px) 24px 40px;
+    }
+
+    .hero-badge{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: var(--gold-soft);
+      border: 1px solid var(--gold-line);
+      padding: 7px 16px;
+      border-radius: 99px;
+      margin-bottom: 26px;
+    }
+    .hero-badge::before{
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .hero h1{
+      font-size: clamp(2.6rem, 6.5vw, 4.4rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+    .hero h1 .t1{
+      display: block;
+      background: linear-gradient(160deg, #ffffff 25%, #9a9ca3 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero h1 .t2{
+      display: block;
+      background: linear-gradient(135deg, #f3ddab 0%, #e2b86b 55%, #c8994a 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub{
+      max-width: 480px;
+      color: var(--text-2);
+      font-size: 1rem;
+      margin: 0 auto;
+    }
+
+    /* Statistik kecil di bawah subjudul */
+    .hero-meta{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 40px;
+    }
+    .meta-item{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .meta-item strong{
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 1.2rem;
+      line-height: 1;
+      color: var(--gold);
+    }
+    .meta-item span{
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .meta-divider{
+      width: 1px;
+      height: 34px;
+      background: var(--border);
+    }
+
+    /* Garis vertikal kecil yang "menetes" — penanda scroll ke bawah */
+    .scroll-hint{
+      display: block;
+      position: relative;
+      width: 1px;
+      height: 64px;
+      margin-top: 58px;
+      background: var(--border-2);
+      overflow: hidden;
+    }
+    .scroll-hint::after{
+      content: "";
+      position: absolute;
+      top: -45%;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      background: var(--gold);
+      animation: drip 2.2s ease-in-out infinite;
+    }
+    @keyframes drip{
+      to{ top: 115%; }
+    }
+
+    /* --------------------------------------------------------------------------
+       06. Ticker nama anggota
+       Pita nama yang jalan pelan. Kontennya diduplikasi lewat JS biar mulus.
+       -------------------------------------------------------------------------- */
+    .ticker{
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 15px 0;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    }
+    .ticker-track{
+      display: flex;
+      align-items: center;
+      width: max-content;
+      animation: tick 30s linear infinite;
+    }
+    .ticker:hover .ticker-track{
+      animation-play-state: paused;
+    }
+    .tick-item{
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+    .tick-item::after{
+      content: "✦";
+      margin: 0 30px;
+      font-size: 0.6rem;
+      color: var(--gold-dim);
+    }
+    @keyframes tick{
+      to{ transform: translateX(-50%); }
+    }
+
+    /* --------------------------------------------------------------------------
+       07. Kartu ketua
+       -------------------------------------------------------------------------- */
+    .leader{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      margin-bottom: 56px;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      transition: border-color 0.35s ease, background 0.35s ease;
+    }
+    .leader:hover{
+      border-color: var(--gold-line);
+      background: var(--surface-2);
+    }
+
+    .leader-left{
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .avatar{
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--gold-soft);
+      border: 1px solid var(--gold-line);
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 0.92rem;
+      letter-spacing: 0.03em;
+      color: var(--gold);
+    }
+
+    .leader-text{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .leader-label{
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .leader-name{
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .leader-status{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--text-2);
+    }
+    .pulse-dot{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: pulse 2.4s infinite;
+    }
+    @keyframes pulse{
+      0%{ box-shadow: 0 0 0 0 rgba(226, 184, 107, 0.4); }
+      70%{ box-shadow: 0 0 0 9px rgba(226, 184, 107, 0); }
+      100%{ box-shadow: 0 0 0 0 rgba(226, 184, 107, 0); }
+    }
+
+    /* --------------------------------------------------------------------------
+       08. Section heading
+       Format: JUDUL ————————— 05 GAMES
+       -------------------------------------------------------------------------- */
+    .section-head{
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .section-title{
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      white-space: nowrap;
+    }
+    .section-head .line{
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-count{
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+    .section-count em{
+      font-family: var(--font-body);
+      font-style: normal;
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-left: 7px;
+    }
+
+    /* --------------------------------------------------------------------------
+       09. Kartu game
+       -------------------------------------------------------------------------- */
+    .games-grid{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .game-card{
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 26px;
+      overflow: hidden;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      transition:
+        transform 0.4s var(--ease),
+        background 0.35s ease,
+        border-color 0.35s ease,
+        box-shadow 0.4s ease;
+    }
+
+    /* Kartu pertama dibikin lebih lebar (bento), biar 5 kartu rapih */
+    .game-card.featured{
+      grid-column: span 2;
+    }
+
+    /* Garis emas 1.5px di atas kartu — cuma muncul pas hover */
+    .game-card::before{
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Cahaya lembut yang ngikutin kursor (posisinya diatur dari JS) */
+    .game-card::after{
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(226, 184, 107, 0.06), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.45s ease;
+      pointer-events: none;
+    }
+
+    .game-card:hover{
+      transform: translateY(-5px);
+      background: var(--surface-2);
+      border-color: var(--gold-line);
+      box-shadow: 0 24px 44px -18px rgba(0, 0, 0, 0.6);
+    }
+    .game-card:hover::before,
+    .game-card:hover::after{
+      opacity: 1;
+    }
+
+    /* Nomor urut gede di kanan atas, gaya outline tipis */
+    .card-index{
+      position: absolute;
+      top: 12px;
+      right: 20px;
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 3.2rem;
+      line-height: 1;
+      color: rgba(255, 255, 255, 0.04);
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+      user-select: none;
+      pointer-events: none;
+      transition: -webkit-text-stroke-color 0.4s ease;
+    }
+    .game-card:hover .card-index{
+      -webkit-text-stroke-color: rgba(226, 184, 107, 0.35);
+    }
+    .game-card.featured .card-index{
+      font-size: 3.8rem;
+    }
+
+    .card-head{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .card-dev{
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .card-status{
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .card-status i{
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0.8;
+    }
+
+    .card-title{
+      font-size: 1.3rem;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .game-card.featured .card-title{
+      font-size: 1.55rem;
+    }
+
+    .card-desc{
+      color: var(--text-2);
+      font-size: 0.9rem;
+      max-width: 46ch;
+      flex-grow: 1;
+    }
+
+    .card-tags{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .card-foot{
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-play{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      border: 1px solid var(--border-2);
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      background: transparent;
+      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .btn-play svg{
+      flex-shrink: 0;
+      transition: transform 0.3s var(--ease);
+    }
+    .btn-play:hover{
+      background: #ffffff;
+      border-color: #ffffff;
+      color: #0a0a0c;
+    }
+    .btn-play:hover svg{
+      transform: translateX(4px);
+    }
+
+    /* --------------------------------------------------------------------------
+       10. Section tentang
+       Dua kolom: kiri judul sticky-feel, kanan isi + prinsip project.
+       -------------------------------------------------------------------------- */
+    .about-grid{
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 56px;
+      align-items: start;
+    }
+
+    .about-left h2{
+      font-size: clamp(1.7rem, 3.2vw, 2.3rem);
+      font-weight: 800;
+      line-height: 1.15;
+      color: #ffffff;
+    }
+    .about-left h2 em{
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .about-right p{
+      color: var(--text-2);
+      font-size: 0.95rem;
+      margin-bottom: 18px;
+    }
+    .about-right p strong{
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .about-list{
+      margin-top: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .about-list li{
+      position: relative;
+      padding-left: 26px;
+      font-size: 0.9rem;
+      color: var(--text-2);
+    }
+    .about-list li::before{
+      content: "—";
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    /* --------------------------------------------------------------------------
+       11. Section cara memainkan
+       Tiga langkah, nomor gede outline, dipisah garis atas tipis.
+       -------------------------------------------------------------------------- */
+    .steps{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .step{
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      transition: border-color 0.35s ease;
+    }
+    .step:hover{
+      border-top-color: var(--gold-line);
+    }
+
+    .step-num{
+      display: block;
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 2.6rem;
+      line-height: 1;
+      color: rgba(255, 255, 255, 0.04);
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.12);
+      margin-bottom: 16px;
+    }
+    .step:hover .step-num{
+      -webkit-text-stroke-color: rgba(226, 184, 107, 0.4);
+    }
+
+    .step h3{
+      font-size: 1.05rem;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .step p{
+      font-size: 0.88rem;
+      color: var(--text-2);
+    }
+
+    /* --------------------------------------------------------------------------
+       12. Footer
+       -------------------------------------------------------------------------- */
+    .footer{
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+      padding: 64px 0 32px;
+      background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.012));
+    }
+
+    .foot-word{
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: clamp(1.6rem, 4.5vw, 2.8rem);
+      letter-spacing: 0.02em;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.14);
+      margin-bottom: 10px;
+      user-select: none;
+    }
+    .foot-word em{
+      font-style: normal;
+      -webkit-text-stroke: 1px var(--gold-dim);
+    }
+    .foot-sub{
+      color: var(--text-3);
+      font-size: 0.88rem;
+      max-width: 420px;
+      margin-bottom: 48px;
+    }
+
+    .foot-grid{
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 40px;
+      padding-bottom: 44px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .foot-col h4{
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 16px;
+    }
+
+    .foot-col ul{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .foot-col a{
+      font-size: 0.88rem;
+      color: var(--text-2);
+      transition: color 0.25s ease;
+    }
+    .foot-col a:hover{
+      color: var(--gold);
+    }
+
+    .foot-desc{
+      font-size: 0.88rem;
+      color: var(--text-2);
+      max-width: 300px;
+    }
+
+    .foot-note{
+      margin-top: 14px;
+      font-size: 0.78rem;
+      color: var(--text-3);
+    }
+    .foot-note span{
+      color: var(--gold-dim);
+    }
+
+    .foot-bottom{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 26px;
+      font-size: 0.78rem;
+      color: var(--text-3);
+    }
+    .foot-bottom .dot{
+      color: var(--gold-dim);
+      margin: 0 6px;
+    }
+
+    /* --------------------------------------------------------------------------
+       13. Tombol kembali ke atas
+       -------------------------------------------------------------------------- */
+    .to-top{
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 800;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border-2);
+      border-radius: 50%;
+      background: rgba(12, 14, 19, 0.85);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      color: var(--text-2);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition:
+        opacity 0.35s ease,
+        visibility 0.35s ease,
+        transform 0.35s var(--ease),
+        color 0.25s ease,
+        border-color 0.25s ease;
+    }
+    .to-top.show{
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+    .to-top:hover{
+      color: var(--gold);
+      border-color: var(--gold-line);
+    }
+
+    /* --------------------------------------------------------------------------
+       14. Animasi & reveal
+       Elemen ber-class .reveal bakal muncul pas ke-scroll (dijalanin JS).
+       Delay antar elemen diatur lewat style="--d:1" dst di HTML.
+       -------------------------------------------------------------------------- */
+    .reveal{
+      opacity: 0;
+      transform: translateY(22px);
+      transition:
+        opacity 0.8s var(--ease),
+        transform 0.8s var(--ease);
+      transition-delay: calc(var(--d, 0) * 80ms);
+    }
+    .reveal.in{
+      opacity: 1;
+      transform: none;
+    }
+
+    /* --------------------------------------------------------------------------
+       15. Responsive
+       Breakpoint: 960 (tablet landscape), 760 (nav mobile), 600 (HP).
+       -------------------------------------------------------------------------- */
+    @media (max-width: 960px){
+      .games-grid{
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .about-grid{
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .foot-grid{
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+      }
+    }
+
+    @media (max-width: 760px){
+      .nav{
+        padding: 0 18px;
+      }
+      .nav-tag{
+        display: none;
+      }
+      .nav-burger{
+        display: block;
+      }
+      /* Link nav berubah jadi panel dropdown */
+      .nav-links{
+        position: fixed;
+        top: calc(var(--nav-h) + 10px);
+        left: 16px;
+        right: 16px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        background: rgba(12, 14, 19, 0.96);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 10px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition:
+          opacity 0.3s ease,
+          visibility 0.3s ease,
+          transform 0.3s var(--ease);
+      }
+      .nav-links.open{
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+      }
+      .nav-links a{
+        padding: 12px 16px;
+        border-radius: 10px;
+      }
+      .steps{
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+
+    @media (max-width: 600px){
+      .section{
+        padding: 56px 0;
+      }
+      .wrap{
+        padding: 0 18px;
+      }
+      .games-grid{
+        grid-template-columns: 1fr;
+      }
+      .game-card.featured{
+        grid-column: auto;
+      }
+      .game-card.featured .card-index{
+        font-size: 3rem;
+      }
+      .card-index{
+        font-size: 2.5rem;
+      }
+      .leader{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 20px;
+      }
+      .hero-meta{
+        gap: 20px;
+      }
+      .meta-divider{
+        height: 28px;
+      }
+      .foot-grid{
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+      .foot-bottom{
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .scroll-hint{
+        height: 48px;
+        margin-top: 44px;
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       16. Aksesibilitas & reduced motion
+       Kalau user motong animasi di setting OS-nya, kita hormati.
+       -------------------------------------------------------------------------- */
+    @media (prefers-reduced-motion: reduce){
+      .reveal{
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      .ticker-track{
+        animation: none;
+      }
+      .scroll-hint::after{
+        animation: none;
+        opacity: 0;
+      }
+      .pulse-dot{
+        animation: none;
+      }
+      .pre-line::after{
+        animation: none;
+        transform: translateX(0);
+      }
+      *,
+      *::before,
+      *::after{
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== PRELOADER ===================== -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="pre-inner">
+      <div class="pre-logo">K<em>1</em></div>
+      <div class="pre-line"></div>
+      <div class="pre-label">Memuat Hub</div>
+    </div>
+  </div>
+
+  <!-- ===================== PROGRESS BAR ===================== -->
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <!-- ===================== NAVIGASI ===================== -->
+  <nav class="nav" id="nav" aria-label="Navigasi utama">
+    <div class="nav-inner">
+
+      <a href="#beranda" class="brand">
+        <span class="brand-mark" aria-hidden="true">K1</span>
+        <span class="brand-name">Hub Game <span>— Kelompok 1</span></span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#karya">Karya</a></li>
+        <li><a href="#tentang">Tentang</a></li>
+        <li><a href="#cara-main">Cara Main</a></li>
+      </ul>
+
+      <span class="nav-tag">v2.0 — 2026</span>
+
+      <button class="nav-burger" id="navBurger" aria-label="Buka menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="beranda">
+      <span class="hero-badge reveal" style="--d:0">Game-game buatan Kelompok 1</span>
+
+      <h1 class="reveal" style="--d:1">
+        <span class="t1">Hub Game</span>
+        <span class="t2">Kelompok 1</span>
+      </h1>
+
+      <p class="hero-sub reveal" style="--d:2">
+        Halaman dibuat oleh:Khizni.                      
+        Kumpulan project game interaktif — ciptaan mandiri dari setiap
+        anggota kelompok. Tinggal klik, langsung main di browser.
+      </p>
+
+      <div class="hero-meta reveal" style="--d:3">
+        <div class="meta-item">
+          <strong>05</strong>
+          <span>Games</span>
+        </div>
+        <span class="meta-divider" aria-hidden="true"></span>
+        <div class="meta-item">
+          <strong>05</strong>
+          <span>Developers</span>
+        </div>
+        <span class="meta-divider" aria-hidden="true"></span>
+        <div class="meta-item">
+          <strong>100%</strong>
+          <span>Mandiri</span>
+        </div>
+      </div>
+
+      <a href="#karya" class="scroll-hint reveal" style="--d:4" aria-label="Scroll ke daftar game"></a>
+    </section>
+
+    <!-- ===================== TICKER NAMA ===================== -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track" id="tickerTrack">
+        <span class="tick-item">Muhammad Khizni Alghifari</span>
+        <span class="tick-item">Meizam Ahmad Fariz</span>
+        <span class="tick-item">Faiz Mubarak Athailah</span>
+        <span class="tick-item">Fariz</span>
+        <span class="tick-item">Raisya Naufal Alif</span>
+        <span class="tick-item">Azfar Tsaqif Alfarezel</span>
+      </div>
+    </div>
+
+    <!-- ===================== KARYA ===================== -->
+    <section class="section" id="karya">
+      <div class="wrap">
+
+        <!-- Ketua kelompok -->
+        <div class="leader reveal" style="--d:0" aria-label="Ketua kelompok">
+          <div class="leader-left">
+            <div class="avatar" aria-hidden="true">MK</div>
+            <div class="leader-text">
+              <span class="leader-label">Ketua Kelompok</span>
+              <span class="leader-name">Muhammad Khizni Alghifari</span>
+            </div>
+          </div>
+          <div class="leader-status">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            Project Overseer
+          </div>
+        </div>
+
+        <div class="section-head reveal" style="--d:1">
+          <span class="section-title">Karya Anggota</span>
+          <span class="line" aria-hidden="true"></span>
+          <span class="section-count">05 <em>Games</em></span>
+        </div>
+
+        <!-- =====================================================
+             DAFTAR GAME
+             Catatan: ganti deskripsi, chip genre, dan href sesuai
+             game asli masing-masing anggota.
+             ===================================================== -->
+        <div class="games-grid">
+
+          <!-- GAME 1 — MEIZAM (kartu featured, lebih lebar) -->
+          <article class="game-card featured reveal" style="--d:2">
+            <span class="card-index" aria-hidden="true">01</span>
+            <div class="card-head">
+              <span class="card-dev">Meizam Ahmad Fariz</span>
+              <span class="card-status"><i aria-hidden="true"></i>Ready</span>
+            </div>
+            <h3 class="card-title">Game Meizam</h3>
+            <p class="card-desc">
+              Deskripsi singkat game buatan Meizam. Ganti teks ini dengan
+              penjelasan gameplay aslinya — ceritain hook-nya apa, biar orang
+              penasaran buat klik main.
+            </p>
+            <div class="card-tags">
+              <span class="chip">Arcade</span>
+              <span class="chip">HTML5</span>
+              <span class="chip">Offline</span>
+            </div>
+            <div class="card-foot">
+              <a href="game_meizam.html" target="_blank" rel="noopener" class="btn-play">
+                Mainkan Game
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14"/>
+                  <path d="m13 6 6 6-6 6"/>
+                </svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- GAME 2 — FAIZ -->
+          <article class="game-card reveal" style="--d:3">
+            <span class="card-index" aria-hidden="true">02</span>
+            <div class="card-head">
+              <span class="card-dev">Faiz Mubarak Athailah</span>
+              <span class="card-status"><i aria-hidden="true"></i>Ready</span>
+            </div>
+            <h3 class="card-title">Game Faiz</h3>
+            <p class="card-desc">
+              Deskripsi singkat game buatan Faiz. Ganti teks ini dengan
+              penjelasan gameplay aslinya.
+            </p>
+            <div class="card-tags">
+              <span class="chip">Puzzle</span>
+              <span class="chip">HTML5</span>
+            </div>
+            <div class="card-foot">
+              <a href="game_faiz.html" target="_blank" rel="noopener" class="btn-play">
+                Mainkan Game
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14"/>
+                  <path d="m13 6 6 6-6 6"/>
+                </svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- GAME 3 — FARIZ -->
+          <article class="game-card reveal" style="--d:4">
+            <span class="card-index" aria-hidden="true">03</span>
+            <div class="card-head">
+              <span class="card-dev">Fariz</span>
+              <span class="card-status"><i aria-hidden="true"></i>Ready</span>
+            </div>
+            <h3 class="card-title">Game Fariz</h3>
+            <p class="card-desc">
+              Deskripsi singkat game buatan Fariz. Ganti teks ini dengan
+              penjelasan gameplay aslinya.
+            </p>
+            <div class="card-tags">
+              <span class="chip">Reflex</span>
+              <span class="chip">HTML5</span>
+            </div>
+            <div class="card-foot">
+              <a href="game_fariz.html" target="_blank" rel="noopener" class="btn-play">
+                Mainkan Game
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14"/>
+                  <path d="m13 6 6 6-6 6"/>
+                </svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- GAME 4 — ALIF -->
+          <article class="game-card reveal" style="--d:5">
+            <span class="card-index" aria-hidden="true">04</span>
+            <div class="card-head">
+              <span class="card-dev">Raisya Naufal Alif</span>
+              <span class="card-status"><i aria-hidden="true"></i>Ready</span>
+            </div>
+            <h3 class="card-title">Game Alif</h3>
+            <p class="card-desc">
+              Deskripsi singkat game buatan Alif. Ganti teks ini dengan
+              penjelasan gameplay aslinya.
+            </p>
+            <div class="card-tags">
+              <span class="chip">Strategy</span>
+              <span class="chip">HTML5</span>
+            </div>
+            <div class="card-foot">
+              <a href="game_alif.html" target="_blank" rel="noopener" class="btn-play">
+                Mainkan Game
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14"/>
+                  <path d="m13 6 6 6-6 6"/>
+                </svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- GAME 5 — AZFAR -->
+          <article class="game-card reveal" style="--d:6">
+            <span class="card-index" aria-hidden="true">05</span>
+            <div class="card-head">
+              <span class="card-dev">Azfar Tsaqif Alfarezel</span>
+              <span class="card-status"><i aria-hidden="true"></i>Ready</span>
+            </div>
+            <h3 class="card-title">Game Azfar</h3>
+            <p class="card-desc">
+              Deskripsi singkat game buatan Azfar. Ganti teks ini dengan
+              penjelasan gameplay aslinya.
+            </p>
+            <div class="card-tags">
+              <span class="chip">Casual</span>
+              <span class="chip">HTML5</span>
+            </div>
+            <div class="card-foot">
+              <a href="game_azfar.html" target="_blank" rel="noopener" class="btn-play">
+                Mainkan Game
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14"/>
+                  <path d="m13 6 6 6-6 6"/>
+                </svg>
+              </a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TENTANG ===================== -->
+    <section class="section" id="tentang">
+      <div class="wrap">
+
+        <div class="section-head reveal" style="--d:0">
+          <span class="section-title">Tentang Project</span>
+          <span class="line" aria-hidden="true"></span>
+          <span class="section-count">Info</span>
+        </div>
+
+        <div class="about-grid">
+
+          <div class="about-left reveal" style="--d:1">
+            <span class="eyebrow">Latar Belakang</span>
+            <h2>
+              Satu hub, lima game, <em>nol dependensi.</em>
+            </h2>
+          </div>
+
+          <div class="about-right reveal" style="--d:2">
+            <p>
+              Project ini adalah kumpulan game yang dikerjakan secara
+              mandiri oleh masing-masing anggota Kelompok 1.
+              Semua game dikumpulkan ke dalam satu halaman hub biar gampang
+              diakses — cukup buka, pilih, dan mainkan.
+            </p>
+            <p>
+              Nggak ada server, nggak ada instalasi. Semua berjalan langsung
+              dari file HTML di browser, jadi bisa dibuka di mana aja dan
+              kapan aja.
+            </p>
+
+            <ul class="about-list">
+              <li>Semua game berjalan langsung di browser, tanpa install apa pun.</li>
+              <li>Ditulis murni dengan HTML, CSS, dan JavaScript.</li>
+              <li>Setiap anggota mengerjakan gamenya sendiri dari nol.</li>
+              <li>Ringan dan responsif — nyaman dibuka di HP maupun laptop.</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CARA MEMAINKAN ===================== -->
+    <section class="section" id="cara-main">
+      <div class="wrap">
+
+        <div class="section-head reveal" style="--d:0">
+          <span class="section-title">Cara Memainkan</span>
+          <span class="line" aria-hidden="true"></span>
+          <span class="section-count">03 <em>Langkah</em></span>
+        </div>
+
+        <div class="steps">
+
+          <div class="step reveal" style="--d:1">
+            <span class="step-num" aria-hidden="true">01</span>
+            <h3>Pilih Game</h3>
+            <p>
+              Scroll ke bagian Karya Anggota, terus pilih game yang mau
+              dimainkan. Tiap kartu ada nama pembuatnya.
+            </p>
+          </div>
+
+          <div class="step reveal" style="--d:2">
+            <span class="step-num" aria-hidden="true">02</span>
+            <h3>Klik Mainkan</h3>
+            <p>
+              Tekan tombol "Mainkan Game". Halaman game bakal kebuka di tab
+              baru, jadi hub-nya tetap terbuka di sini.
+            </p>
+          </div>
+
+          <div class="step reveal" style="--d:3">
+            <span class="step-num" aria-hidden="true">03</span>
+            <h3>Langsung Main</h3>
+            <p>
+              Nggak perlu daftar atau download apa-apa. Game-nya jalan
+              langsung — kalau ada kendala, kabarin pembuatnya ya.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer" id="kontak">
+    <div class="wrap">
+
+      <p class="foot-word reveal" style="--d:0">HUB GAME <em>—</em> KELOMPOK 1</p>
+      <p class="foot-sub reveal" style="--d:1">
+        Showcase portfolio game buatan sendiri. Dikumpulin dalam satu tempat
+        biar gampang dilihat dan dimainkan siapa saja.
+      </p>
+
+      <div class="foot-grid reveal" style="--d:2">
+
+        <div class="foot-col">
+          <h4>Tentang</h4>
+          <p class="foot-desc">
+            Enam orang, satu kelompok, lima game. Semua dikerjakan dari nol
+            pakai teknologi web dasar.
+          </p>
+          <p class="foot-note">
+            Ketua: Muhammad Khizni Alghifari <span>— Project Overseer</span>
+          </p>
+        </div>
+
+        <div class="foot-col">
+          <h4>Navigasi</h4>
+          <ul>
+            <li><a href="#beranda">Beranda</a></li>
+            <li><a href="#karya">Karya</a></li>
+            <li><a href="#tentang">Tentang</a></li>
+            <li><a href="#cara-main">Cara Main</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-col">
+          <h4>Daftar Game</h4>
+          <ul>
+            <li><a href="game_meizam.html" target="_blank" rel="noopener">Game Meizam</a></li>
+            <li><a href="game_faiz.html" target="_blank" rel="noopener">Game Faiz</a></li>
+            <li><a href="game_fariz.html" target="_blank" rel="noopener">Game Fariz</a></li>
+            <li><a href="game_alif.html" target="_blank" rel="noopener">Game Alif</a></li>
+            <li><a href="game_azfar.html" target="_blank" rel="noopener">Game Azfar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-col">
+          <h4>Teknologi</h4>
+          <ul>
+            <li><a href="#tentang">HTML5</a></li>
+            <li><a href="#tentang">CSS3</a></li>
+            <li><a href="#tentang">JavaScript</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="foot-bottom">
+        <p>
+          © <span id="year">2026</span> Kelompok 1
+          <span class="dot" aria-hidden="true">·</span>
+          Semua game dibuat oleh anggota masing-masing
+        </p>
+        <p>Dibuat dengan HTML, CSS &amp; JS murni — tanpa framework</p>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ===================== TOMBOL KE ATAS ===================== -->
+  <button class="to-top" id="toTop" aria-label="Kembali ke atas">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 19V5"/>
+      <path d="m5 12 7-7 7 7"/>
+    </svg>
+  </button>
+
+  <script>
+    /* ==========================================================
+       HUB GAME KELOMPOK 1 — script
+       Semua behavior ringan: preloader, scroll, reveal, dll.
+       Dibungkus IIFE biar variabelnya nggak bocor ke global.
+       ========================================================== */
+    (function(){
+      "use strict";
+
+      /* ----------------------------------------------------------
+         1. Preloader
+         Hilang setelah halaman ke-load. Ada fail-safe 3.5 detik
+         kalau-kalau load-nya lambat (misal internet ngadat pas
+         ambil font), biar user nggak nunggu di layar kosong.
+         ---------------------------------------------------------- */
+      var preloader = document.getElementById("preloader");
+      var revealsStarted = false;
+
+      function startReveals(){
+        if (revealsStarted) return;
+        revealsStarted = true;
+
+        // Reveal pakai IntersectionObserver — lebih hemat dari
+        // scroll event manual, dan otomatis stop setelah muncul.
+        if ("IntersectionObserver" in window){
+          var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(entry){
+              if (entry.isIntersecting){
+                entry.target.classList.add("in");
+                io.unobserve(entry.target);
+              }
+            });
+          }, {
+            threshold: 0.12,
+            rootMargin: "0px 0px -8% 0px"
+          });
+
+          document.querySelectorAll(".reveal").forEach(function(el){
+            io.observe(el);
+          });
+        } else {
+          // Browser jadul: tampilin semuanya aja langsung
+          document.querySelectorAll(".reveal").forEach(function(el){
+            el.classList.add("in");
+          });
+        }
+      }
+
+      function hidePreloader(){
+        preloader.classList.add("done");
+        // Kasih jeda kecil biar transisi preloader selesai dulu
+        // sebelum animasi konten dimulai
+        setTimeout(startReveals, 120);
+      }
+
+      if (document.readyState === "complete"){
+        setTimeout(hidePreloader, 400);
+      } else {
+        window.addEventListener("load", function(){
+          setTimeout(hidePreloader, 400);
+        });
+      }
+
+      // Fail-safe
+      setTimeout(function(){
+        preloader.classList.add("done");
+        startReveals();
+      }, 3500);
+
+      /* ----------------------------------------------------------
+         2. Scroll handler: progress bar, nav state, tombol ke atas,
+            dan scrollspy buat highlight link nav yang aktif.
+         Dipanggil lewat requestAnimationFrame biar nggak ngorbanin
+         performa pas scroll cepet.
+         ---------------------------------------------------------- */
+      var progress  = document.getElementById("progress");
+      var nav       = document.getElementById("nav");
+      var toTop     = document.getElementById("toTop");
+      var spyLinks  = Array.prototype.slice.call(
+        document.querySelectorAll(".nav-links a")
+      );
+      var spySections = Array.prototype.slice.call(
+        document.querySelectorAll("section[id]")
+      );
+
+      var ticking = false;
+
+      function onScrollUpdate(){
+        var y = window.scrollY || window.pageYOffset;
+        var max = document.documentElement.scrollHeight - window.innerHeight;
+
+        // Progress bar tipis di atas
+        progress.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
+
+        // Nav dapet background pas mulai scroll
+        nav.classList.toggle("scrolled", y > 24);
+
+        // Tombol ke atas muncul setelah scroll lumayan jauh
+        toTop.classList.toggle("show", y > 480);
+
+        // Scrollspy: cari section paling atas yang udah dilewati
+        var pos = y + 140;
+        var currentId = "";
+        spySections.forEach(function(sec){
+          if (sec.offsetTop <= pos){
+            currentId = sec.id;
+          }
+        });
+        spyLinks.forEach(function(link){
+          link.classList.toggle(
+            "active",
+            link.getAttribute("href") === "#" + currentId
+          );
+        });
+
+        ticking = false;
+      }
+
+      window.addEventListener("scroll", function(){
+        if (!ticking){
+          window.requestAnimationFrame(onScrollUpdate);
+          ticking = true;
+        }
+      }, { passive: true });
+
+      // Panggil sekali di awal biar state awal bener
+      onScrollUpdate();
+
+      // Tombol ke atas
+      toTop.addEventListener("click", function(){
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      });
+
+      /* ----------------------------------------------------------
+         3. Spotlight kartu game
+         Posisi cahaya di CSS dikontrol via --mx / --my.
+         Cuma aktif di perangkat dengan mouse (pointer: fine),
+         di HP nggak perlu dan cuma buang-bang resource.
+         ---------------------------------------------------------- */
+      var isFinePointer = window.matchMedia("(pointer: fine)").matches;
+
+      if (isFinePointer){
+        document.querySelectorAll(".game-card").forEach(function(card){
+          card.addEventListener("mousemove", function(ev){
+            var rect = card.getBoundingClientRect();
+            card.style.setProperty("--mx", (ev.clientX - rect.left) + "px");
+            card.style.setProperty("--my", (ev.clientY - rect.top) + "px");
+          });
+        });
+      }
+
+      /* ----------------------------------------------------------
+         4. Ticker nama
+         Konten track diduplikasi sekali, terus CSS animasi
+         translateX(-50%) bikin loop-nya mulus tanpa putus.
+         Jangan hapus baris ini — nanti ticker-nya jadi loncat.
+         ---------------------------------------------------------- */
+      var tickerTrack = document.getElementById("tickerTrack");
+      if (tickerTrack){
+        tickerTrack.innerHTML += tickerTrack.innerHTML;
+      }
+
+      /* ----------------------------------------------------------
+         5. Menu mobile
+         Toggle panel link + ganti ikon burger jadi X.
+         Panel ditutup otomatis pas salah satu link diklik.
+         ---------------------------------------------------------- */
+      var burger   = document.getElementById("navBurger");
+      var navLinks = document.getElementById("navLinks");
+
+      function closeMenu(){
+        navLinks.classList.remove("open");
+        burger.classList.remove("active");
+        burger.setAttribute("aria-expanded", "false");
+        burger.setAttribute("aria-label", "Buka menu");
+      }
+
+      burger.addEventListener("click", function(){
+        var isOpen = navLinks.classList.toggle("open");
+        burger.classList.toggle("active", isOpen);
+        burger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        burger.setAttribute("aria-label", isOpen ? "Tutup menu" : "Buka menu");
+      });
+
+      navLinks.querySelectorAll("a").forEach(function(link){
+        link.addEventListener("click", closeMenu);
+      });
+
+      // Kalau layar diperbesar lagi, pastikan menu ke-tutup
+      window.addEventListener("resize", function(){
+        if (window.innerWidth > 760){
+          closeMenu();
+        }
+      });
+
+      /* ----------------------------------------------------------
+         6. Tahun otomatis di footer
+         Biar nggak perlu edit tiap ganti tahun
+         ---------------------------------------------------------- */
+      var yearEl = document.getElementById("year");
+      if (yearEl){
+        yearEl.textContent = new Date().getFullYear();
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
