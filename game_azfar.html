@@ -1327,26 +1327,36 @@ function updatePlayer(dt) {
   const pd = playerData;
   const maxSpd = pd.maxSpeed;
 
-  if (keys['ArrowUp'] || keys['KeyW']) pd.speed += pd.accelRate * dt * 60;
-  else if (keys['ArrowDown'] || keys['KeyS']) pd.speed -= pd.accelRate * 1.8 * dt * 60;
-  else pd.speed *= (1 - 0.35 * dt);
+  // Acceleration/Deceleration (improved smoothing)
+  if (keys['ArrowUp'] || keys['KeyW']) {
+    pd.speed += pd.accelRate * dt * 60;
+  } else if (keys['ArrowDown'] || keys['KeyS']) {
+    pd.speed -= pd.accelRate * 2.0 * dt * 60;
+  } else {
+    // Natural deceleration (drag/friction)
+    pd.speed *= Math.pow(1 - 0.35, dt);
+  }
 
   pd.speed = Math.max(0, Math.min(pd.speed, maxSpd));
 
+  // Turning (smooth handling)
   const turnFactor = pd.handling * (1 - 0.45 * (pd.speed / maxSpd));
   if (keys['ArrowLeft'] || keys['KeyA']) pd.lateral -= turnFactor * dt * 60;
   if (keys['ArrowRight'] || keys['KeyD']) pd.lateral += turnFactor * dt * 60;
 
+  // Track boundary collision
   const maxLat = TRACK_WIDTH / 2 - 1.5;
-  if (pd.lateral > maxLat) { pd.lateral = maxLat; pd.speed *= 0.97; }
-  if (pd.lateral < -maxLat) { pd.lateral = -maxLat; pd.speed *= 0.97; }
+  if (pd.lateral > maxLat) { pd.lateral = maxLat; pd.speed *= 0.96; }
+  if (pd.lateral < -maxLat) { pd.lateral = -maxLat; pd.speed *= 0.96; }
 
+  // Off-track penalty (grass/runoff area)
   const offCenter = Math.abs(pd.lateral) / maxLat;
-  if (offCenter > 0.75) pd.speed *= (1 - 0.25 * dt);
+  if (offCenter > 0.75) pd.speed *= Math.pow(1 - 0.25, dt);
 
   pd.prevT = pd.trackT;
   pd.trackT += (pd.speed * dt) / trackLength;
 
+  // Lap completion
   if (pd.trackT >= 1) {
     pd.trackT -= 1;
     pd.lap++;
@@ -1354,25 +1364,29 @@ function updatePlayer(dt) {
     else { showLapPopup(pd.lap); }
   }
 
+  // Position interpolation (smooth movement)
   const tp = getTrackPos(pd.trackT, pd.lateral);
-  playerMesh.position.lerp(tp.pos, 0.35);
+  playerMesh.position.lerp(tp.pos, 0.30);
   playerMesh.position.y = 0;
 
+  // Rotation interpolation (smooth turning)
   const ta = Math.atan2(tp.tangent.x, tp.tangent.z);
   let ad = ta - playerMesh.rotation.y;
   while (ad > Math.PI) ad -= Math.PI * 2;
   while (ad < -Math.PI) ad += Math.PI * 2;
   playerMesh.rotation.y += ad * Math.min(1, dt * 10);
 
+  // Lean angle (tilt effect)
   const tt = -(keys['ArrowLeft'] || keys['KeyA'] ? 1 : 0) + (keys['ArrowRight'] || keys['KeyD'] ? 1 : 0);
   pd.tilt += (tt * 0.38 - pd.tilt) * dt * 6;
   playerMesh.rotation.z = pd.tilt;
 
-  // Partikel ban (reduced frequency untuk performa)
+  // Tire particle effects (reduced for performance)
   if ((keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD']) && pd.speed > maxSpd * 0.25 && Math.random() > 0.5) {
     spawnTireParticle(playerMesh.position, 1);
   }
-  // Partikel knalpot (reduced frequency)
+  
+  // Exhaust particle effects
   if (pd.speed > maxSpd * 0.5 && Math.random() > 0.6) {
     spawnExhaustParticle(playerMesh);
   }
@@ -1381,37 +1395,51 @@ function updatePlayer(dt) {
 /* ====== UPDATE AI ====== */
 function updateAI(dt) {
   for (const ai of aiRiders) {
-    if (ai.finished) { ai.speed *= 0.93; }
+    if (ai.finished) { ai.speed *= Math.pow(0.93, dt); }
+    
+    // AI steering behavior
     ai.lateralTimer -= dt;
     if (ai.lateralTimer <= 0) {
       ai.targetLateral = (Math.random() - 0.5) * (TRACK_WIDTH - 8);
       ai.lateralTimer = 0.8 + Math.random() * 2.5;
     }
+    
+    // AI acceleration with skill variation (smoother)
     const sv = 0.88 + Math.sin(raceTime * ai.skill * 2.3 + ai.skill * 10) * 0.12;
     ai.speed += ai.accelRate * dt * 60 * sv;
     ai.speed = Math.max(0, Math.min(ai.speed, ai.maxSpeed));
 
+    // Smooth steering interpolation
     const ld = ai.targetLateral - ai.lateral;
     ai.lateral += Math.sign(ld) * Math.min(Math.abs(ld), ai.handling * dt * 45);
+    
+    // Track boundary
     const ml = TRACK_WIDTH / 2 - 1.5;
     ai.lateral = Math.max(-ml, Math.min(ml, ai.lateral));
 
+    // Track progression
     ai.prevT = ai.trackT;
     ai.trackT += (ai.speed * dt) / trackLength;
     if (ai.trackT >= 1) { ai.trackT -= 1; ai.lap++; if (ai.lap > TOTAL_LAPS) { ai.finished = true; ai.finishTime = raceTime; ai.trackT = 0; } }
 
+    // Position interpolation (smooth)
     const tp = getTrackPos(ai.trackT, ai.lateral);
-    ai.mesh.position.lerp(tp.pos, 0.28);
+    ai.mesh.position.lerp(tp.pos, 0.30);
     ai.mesh.position.y = 0;
+    
+    // Rotation interpolation (smooth)
     const ta = Math.atan2(tp.tangent.x, tp.tangent.z);
     let ad = ta - ai.mesh.rotation.y;
     while (ad > Math.PI) ad -= Math.PI * 2;
     while (ad < -Math.PI) ad += Math.PI * 2;
     ai.mesh.rotation.y += ad * Math.min(1, dt * 7);
+    
+    // Lean angle
     ai.tilt += (Math.sign(ld) * 0.22 - ai.tilt) * dt * 4;
     ai.mesh.rotation.z = ai.tilt;
 
-    if (ai.speed > ai.maxSpeed * 0.4) spawnTireParticle(ai.mesh.position, 1);
+    // Particles
+    if (ai.speed > ai.maxSpeed * 0.4 && Math.random() > 0.7) spawnTireParticle(ai.mesh.position, 1);
   }
 }
 
@@ -1420,8 +1448,9 @@ const particleGroup = new THREE.Group();
 const pGeoSmall = new THREE.SphereGeometry(0.06, 4, 3);
 
 function spawnTireParticle(pos, count) {
-  if (tireParticles.length > 80) return;
+  if (tireParticles.length >= 20) return;
   for (let c = 0; c < count; c++) {
+    if (tireParticles.length >= 20) break;
     const mat = new THREE.MeshBasicMaterial({ color: 0x555555, transparent: true, opacity: 0.5 });
     const p = new THREE.Mesh(pGeoSmall, mat);
     p.position.set(pos.x + (Math.random() - 0.5) * 0.6, 0.04, pos.z + (Math.random() - 0.5) * 0.6);
@@ -1431,7 +1460,7 @@ function spawnTireParticle(pos, count) {
 }
 
 function spawnExhaustParticle(motorMesh) {
-  if (exhaustParticles.length > 30) return;
+  if (exhaustParticles.length >= 15) return;
   const mat = new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.3 });
   const p = new THREE.Mesh(pGeoSmall, mat);
   // Posisi di ujung knalpot
@@ -1512,7 +1541,9 @@ function updateCamera(dt) {
   camera.fov = 62 + sr * 22;
   camera.updateProjectionMatrix();
 
-  camera.position.lerp(targetPos, Math.min(1, dt * 7));
+  // Smooth camera movement (improved)
+  const cameraLerpSpeed = Math.min(1, dt * 5);
+  camera.position.lerp(targetPos, cameraLerpSpeed);
 
   const lookAhead = tp.pos.clone().add(tp.tangent.clone().multiplyScalar(4 + sr * 10));
   lookAhead.y = 1.2;
@@ -1650,7 +1681,9 @@ if ('ontouchstart' in window) setupTouchControls();
 /* ====== LOOP UTAMA ====== */
 function animate() {
   requestAnimationFrame(animate);
-  const dt = Math.min(clock.getDelta(), 0.05);
+  let dt = clock.getDelta();
+  // Prevent frame skip - ensure minimum dt for physics consistency
+  dt = Math.max(0.008, Math.min(dt, 0.05));
 
   if (gameState === 'COUNTDOWN') {
     updateCountdown(dt); updateCamera(dt); updateLapPopup(dt);
