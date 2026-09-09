@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNIPER ELITE 2D</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#0a0e0a;--fg:#e8ece8;--muted:#5a6a5a;--accent:#00ff88;--danger:#ff3344;--warning:#ffaa00;--card:rgba(15,25,15,0.92);--border:rgba(0,255,136,0.15)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:'Rajdhani',sans-serif;overflow:hidden;height:100vh;width:100vw;cursor:default}
+canvas{display:block;position:fixed;top:0;left:0;z-index:1}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s}
+.overlay.hidden{opacity:0;pointer-events:none}
+#menuScreen{background:linear-gradient(180deg,rgba(5,10,5,0.95),rgba(10,20,10,0.98))}
+.menu-box{text-align:center;max-width:600px;padding:40px}
+.menu-box h1{font-family:'Orbitron',sans-serif;font-size:clamp(36px,7vw,72px);font-weight:900;color:var(--accent);letter-spacing:6px;text-shadow:0 0 40px rgba(0,255,136,0.3);margin-bottom:8px;line-height:1.1}
+.menu-box .sub{font-size:18px;color:var(--muted);letter-spacing:8px;text-transform:uppercase;margin-bottom:50px}
+.loc-cards{display:flex;gap:20px;margin-bottom:40px;justify-content:center;flex-wrap:wrap}
+.loc-card{width:240px;padding:24px 20px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+.loc-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,255,136,0.15)}
+.loc-card.selected{border-color:var(--accent);box-shadow:0 0 20px rgba(0,255,136,0.2)}
+.loc-card.selected::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
+.loc-card .icon{font-size:36px;color:var(--accent);margin-bottom:12px}
+.loc-card h3{font-family:'Orbitron',sans-serif;font-size:16px;margin-bottom:6px;letter-spacing:2px}
+.loc-card p{font-size:13px;color:var(--muted);line-height:1.4}
+.btn-play{font-family:'Orbitron',sans-serif;font-size:18px;padding:16px 60px;background:transparent;border:2px solid var(--accent);color:var(--accent);border-radius:8px;cursor:pointer;letter-spacing:4px;transition:all 0.3s;text-transform:uppercase}
+.btn-play:hover{background:var(--accent);color:var(--bg);box-shadow:0 0 30px rgba(0,255,136,0.3)}
+.btn-play:disabled{opacity:0.3;cursor:not-allowed}
+.btn-play:disabled:hover{background:transparent;color:var(--accent);box-shadow:none}
+.controls-info{margin-top:30px;font-size:13px;color:var(--muted);line-height:1.8}
+.controls-info kbd{background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px;font-family:'Orbitron',sans-serif;font-size:11px;color:var(--fg);border:1px solid rgba(255,255,255,0.1)}
+#shopScreen{background:rgba(5,5,5,0.93);backdrop-filter:blur(8px)}
+.shop-box{max-width:700px;width:90%;text-align:center}
+.shop-box h2{font-family:'Orbitron',sans-serif;font-size:28px;color:var(--accent);letter-spacing:4px;margin-bottom:8px}
+.shop-money{font-size:20px;color:var(--warning);margin-bottom:30px}
+.shop-money i{margin-right:6px}
+.weapon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:30px}
+.wpn-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 14px;cursor:pointer;transition:all 0.3s;position:relative;text-align:left}
+.wpn-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.wpn-card.owned{border-color:rgba(0,255,136,0.4);background:rgba(0,255,136,0.05)}
+.wpn-card.equipped{border-color:var(--accent);box-shadow:0 0 15px rgba(0,255,136,0.15)}
+.wpn-card .wpn-name{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:1px;margin-bottom:8px}
+.wpn-card .wpn-stat{font-size:12px;color:var(--muted);margin-bottom:3px;display:flex;justify-content:space-between}
+.wpn-card .wpn-stat span:last-child{color:var(--fg)}
+.wpn-card .wpn-price{margin-top:10px;font-size:14px;color:var(--warning);font-weight:700}
+.wpn-card .wpn-tag{position:absolute;top:10px;right:10px;font-size:10px;padding:2px 8px;border-radius:4px;font-family:'Orbitron',sans-serif;letter-spacing:1px}
+.tag-owned{background:rgba(0,255,136,0.15);color:var(--accent)}
+.tag-equipped{background:var(--accent);color:var(--bg)}
+.btn-continue{font-family:'Orbitron',sans-serif;font-size:14px;padding:12px 40px;background:transparent;border:2px solid var(--accent);color:var(--accent);border-radius:8px;cursor:pointer;letter-spacing:3px;transition:all 0.3s}
+.btn-continue:hover{background:var(--accent);color:var(--bg)}
+#gameOverScreen{background:rgba(10,0,0,0.92)}
+.go-box{text-align:center}
+.go-box h2{font-family:'Orbitron',sans-serif;font-size:42px;color:var(--danger);letter-spacing:6px;margin-bottom:20px}
+.go-stats{margin:30px 0;font-size:18px;line-height:2.2;color:var(--muted)}
+.go-stats span{color:var(--fg);font-weight:700}
+.btn-restart{font-family:'Orbitron',sans-serif;font-size:16px;padding:14px 50px;background:transparent;border:2px solid var(--danger);color:var(--danger);border-radius:8px;cursor:pointer;letter-spacing:4px;transition:all 0.3s}
+.btn-restart:hover{background:var(--danger);color:#fff}
+#hud{position:fixed;top:0;left:0;width:100%;z-index:5;pointer-events:none;padding:16px 24px;display:flex;justify-content:space-between;align-items:flex-start}
+#hud.hidden{display:none}
+.hud-left,.hud-right{pointer-events:auto}
+.hud-hp{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.hud-hp i{color:var(--danger);font-size:24px;text-shadow:0 0 10px var(--danger)}
+.hp-bar-bg{width:180px;height:14px;background:rgba(255,255,255,0.1);border-radius:7px;overflow:hidden;border:1px solid rgba(255,255,255,0.2);box-shadow:inset 0 0 8px rgba(0,0,0,0.5)}
+.hp-bar{height:100%;background:linear-gradient(90deg,var(--accent),#00ff88);border-radius:7px;transition:width 0.3s,background 0.3s;box-shadow:0 0 12px var(--accent)}
+.hp-bar.low{background:linear-gradient(90deg,var(--danger),#ff5566);box-shadow:0 0 12px var(--danger)}
+.hp-text{font-size:14px;font-weight:700;min-width:50px;text-shadow:0 0 8px rgba(0,255,136,0.5)}
+.hud-wave{font-family:'Orbitron',sans-serif;font-size:16px;color:var(--accent);letter-spacing:2px;text-shadow:0 0 10px rgba(0,255,136,0.4)}
+.hud-right{text-align:right}
+.hud-score{font-family:'Orbitron',sans-serif;font-size:26px;color:var(--fg);margin-bottom:4px;text-shadow:0 0 10px rgba(255,255,255,0.3)}
+.hud-money{font-size:18px;color:var(--warning);text-shadow:0 0 10px rgba(255,170,0,0.5)}
+.hud-money i{margin-right:4px}
+.hud-weapon{font-size:14px;color:var(--muted);margin-top:6px;text-shadow:0 0 8px rgba(100,100,100,0.3)}
+#dodgeBar{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:5;pointer-events:none}
+#dodgeBar.hidden{display:none}
+.dodge-bar-bg{width:200px;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;border:1px solid rgba(0,255,136,0.3)}
+.dodge-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#00ff88);border-radius:4px;transition:width 0.1s;box-shadow:0 0 10px var(--accent)}
+.dodge-label{text-align:center;font-size:11px;color:var(--muted);margin-top:4px;font-family:'Orbitron',sans-serif;letter-spacing:1px}
+#mobileControls{position:fixed;bottom:20px;right:20px;z-index:6;display:none}
+@media(max-width:768px){#mobileControls{display:flex;gap:12px}}
+.mob-btn{width:60px;height:60px;border-radius:50%;background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.3);color:var(--accent);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.mob-btn:active{background:rgba(0,255,136,0.3)}
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+<!-- MENU -->
+<div id="menuScreen" class="overlay">
+<div class="menu-box">
+<h1>SNIPER ELITE</h1>
+<div class="sub">Precision is everything</div>
+<div class="loc-cards">
+<div class="loc-card" data-loc="forest" onclick="selectLocation('forest')">
+<div class="icon"><i class="fas fa-tree"></i></div>
+<h3>HUTAN</h3>
+<p>Bersembunyi di atas pohon raksasa. Kanopi lebat menutupi pandangan.</p>
+</div>
+<div class="loc-card" data-loc="city" onclick="selectLocation('city')">
+<div class="icon"><i class="fas fa-city"></i></div>
+<h3>KOTA</h3>
+<p>Posisi di atap gedung tinggi. Pemandangan urban yang luas.</p>
+</div>
+</div>
+<button class="btn-play" id="btnPlay" disabled onclick="startGame()">MULAI MISI</button>
+<div class="controls-info">
+<kbd>MOUSE</kbd> Bidik &nbsp; <kbd>KLIK</kbd> Tembak &nbsp; <kbd>SPACE</kbd> Menghindar &nbsp; <kbd>R</kbd> Reload
+</div>
+</div>
+</div>
+
+<!-- SHOP -->
+<div id="shopScreen" class="overlay hidden">
+<div class="shop-box">
+<h2>ARMORY</h2>
+<div class="shop-money"><i class="fas fa-coins"></i> <span id="shopMoney">0</span></div>
+<div class="weapon-grid" id="weaponGrid"></div>
+<button class="btn-continue" onclick="closeShop()">LANJUTKAN</button>
+</div>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameOverScreen" class="overlay hidden">
+<div class="go-box">
+<h2>MISI GAGAL</h2>
+<div class="go-stats">
+Gelombang: <span id="goWave">0</span><br>
+Skor: <span id="goScore">0</span><br>
+Musuh dihabisi: <span id="goKills">0</span>
+</div>
+<button class="btn-restart" onclick="restartGame()">ULANGI MISI</button>
+</div>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+<div class="hud-left">
+<div class="hud-hp">
+<i class="fas fa-heart"></i>
+<div class="hp-bar-bg"><div class="hp-bar" id="hpBar"></div></div>
+<span class="hp-text" id="hpText">100</span>
+</div>
+<div class="hud-wave" id="hudWave">GELOMBANG 1</div>
+</div>
+<div class="hud-right">
+<div class="hud-score" id="hudScore">0</div>
+<div class="hud-money"><i class="fas fa-coins"></i><span id="hudMoney">0</span></div>
+<div class="hud-weapon" id="hudWeapon">M40A5</div>
+</div>
+</div>
+
+<!-- DODGE BAR -->
+<div id="dodgeBar" class="hidden">
+<div class="dodge-bar-bg"><div class="dodge-bar-fill" id="dodgeBarFill"></div></div>
+<div class="dodge-label">SPACE - MENGHINDAR</div>
+</div>
+
+<!-- MOBILE CONTROLS -->
+<div id="mobileControls">
+<div class="mob-btn" ontouchstart="mobileDodge()"><i class="fas fa-person-running"></i></div>
+</div>
+
+<script>
+/* ============================================================
+   KONFIGURASI SENJATA
+   ============================================================ */
+const WEAPONS = {
+    m40a5: {
+        name: 'M40A5', price: 0, damage: 50, zoom: 1.4, reloadTime: 2.5,
+        clipSize: 5, fireRate: 1.2, color: '#aaaaaa', desc: 'Senjata standar'
+    },
+    svd: {
+        name: 'SVD Dragunov', price: 300, damage: 70, zoom: 1.6, reloadTime: 2.8,
+        clipSize: 10, fireRate: 0.9, color: '#cc8844', desc: 'Tembak cepat'
+    },
+    barrett: {
+        name: 'Barrett M82', price: 600, damage: 150, zoom: 2.0, reloadTime: 4.5,
+        clipSize: 5, fireRate: 2.0, color: '#555555', desc: 'Kerusakan masif'
+    },
+    awm: {
+        name: 'AWM', price: 1000, damage: 200, zoom: 2.5, reloadTime: 5.0,
+        clipSize: 5, fireRate: 2.5, color: '#336633', desc: 'Senjata terbaik'
+    }
+};
+
+/* ============================================================
+   STATUS GAME
+   ============================================================ */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let G = {}; // Objek game utama
+
+function initGameState() {
+    G = {
+        state: 'menu', // menu, playing, shop, gameover
+        location: null,
+        score: 0,
+        money: 0,
+        totalKills: 0,
+        wave: 0,
+        player: {
+            x: 0, y: 0, hp: 100, maxHp: 100,
+            weapon: 'm40a5', ammo: 5, maxAmmo: 5,
+            dodging: false, dodgeTimer: 0, dodgeCooldown: 0, dodgeMaxCooldown: 3,
+            reloading: false, reloadTimer: 0, fireCooldown: 0,
+            invulnerable: false
+        },
+        enemies: [],
+        bullets: [],        // Peluru musuh
+        playerBullets: [],  // Efek peluru pemain
+        particles: [],
+        floatingTexts: [],
+        warningMarkers: [],
+        muzzleFlash: 0,
+        screenShake: { x: 0, y: 0, intensity: 0 },
+        waveTimer: 0,
+        waveClearTimer: 0,
+        ownedWeapons: ['m40a5'],
+        time: 0,
+        bgElements: [],
+        scopeRotation: 0
+    };
+}
+initGameState();
+
+/* ============================================================
+   MOUSE & INPUT
+   ============================================================ */
+let mouse = { x: W / 2, y: H / 2, down: false };
+canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+canvas.addEventListener('mousedown', e => { if (e.button === 0) mouse.down = true; });
+canvas.addEventListener('mouseup', e => { if (e.button === 0) mouse.down = false; });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+document.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); tryDodge(); }
+    if (e.code === 'KeyR') tryReload();
+});
+document.addEventListener('keyup', e => {});
+
+function mobileDodge() { tryDodge(); }
+
+/* ============================================================
+   MENU & UI
+   ============================================================ */
+function selectLocation(loc) {
+    G.location = loc;
+    document.querySelectorAll('.loc-card').forEach(c => c.classList.remove('selected'));
+    document.querySelector(`.loc-card[data-loc="${loc}"]`).classList.add('selected');
+    document.getElementById('btnPlay').disabled = false;
+}
+
+function startGame() {
+    if (!G.location) return;
+    G.state = 'playing';
+    G.wave = 0;
+    G.score = 0;
+    G.money = 0;
+    G.totalKills = 0;
+    G.player.hp = 100;
+    G.player.weapon = 'm40a5';
+    G.player.ammo = WEAPONS.m40a5.clipSize;
+    G.player.maxAmmo = WEAPONS.m40a5.clipSize;
+    G.player.dodging = false;
+    G.player.dodgeCooldown = 0;
+    G.player.reloading = false;
+    G.player.fireCooldown = 0;
+    G.enemies = [];
+    G.bullets = [];
+    G.playerBullets = [];
+    G.particles = [];
+    G.floatingTexts = [];
+    G.warningMarkers = [];
+    G.waveTimer = 1;
+    G.waveClearTimer = 0;
+    G.ownedWeapons = ['m40a5'];
+    generateBackground();
+    document.getElementById('menuScreen').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('dodgeBar').classList.remove('hidden');
+    updateHUD();
+}
+
+function restartGame() {
+    document.getElementById('gameOverScreen').classList.add('hidden');
+    document.getElementById('menuScreen').classList.remove('hidden');
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('dodgeBar').classList.add('hidden');
+    initGameState();
+}
+
+function updateHUD() {
+    const p = G.player;
+    const wpn = WEAPONS[p.weapon];
+    const pct = Math.max(0, p.hp / p.maxHp * 100);
+    const bar = document.getElementById('hpBar');
+    bar.style.width = pct + '%';
+    bar.className = 'hp-bar' + (pct < 30 ? ' low' : '');
+    document.getElementById('hpText').textContent = Math.ceil(p.hp);
+    document.getElementById('hudWave').textContent = 'GELOMBANG ' + G.wave;
+    document.getElementById('hudScore').textContent = G.score;
+    document.getElementById('hudMoney').textContent = G.money;
+    document.getElementById('hudWeapon').textContent = wpn.name + ' [' + p.ammo + '/' + p.maxAmmo + ']' + (p.reloading ? ' RELOADING...' : '');
+    const dodgePct = p.dodgeCooldown > 0 ? ((p.dodgeMaxCooldown - p.dodgeCooldown) / p.dodgeMaxCooldown * 100) : 100;
+    document.getElementById('dodgeBarFill').style.width = dodgePct + '%';
+}
+
+/* ============================================================
+   SHOP
+   ============================================================ */
+function openShop() {
+    G.state = 'shop';
+    document.getElementById('shopMoney').textContent = G.money;
+    renderShop();
+    document.getElementById('shopScreen').classList.remove('hidden');
+}
+
+function renderShop() {
+    const grid = document.getElementById('weaponGrid');
+    grid.innerHTML = '';
+    for (const [id, wpn] of Object.entries(WEAPONS)) {
+        const owned = G.ownedWeapons.includes(id);
+        const equipped = G.player.weapon === id;
+        const canBuy = !owned && G.money >= wpn.price;
+        const card = document.createElement('div');
+        card.className = 'wpn-card' + (equipped ? ' equipped' : owned ? ' owned' : '');
+        if (equipped || canBuy) card.style.cursor = 'pointer';
+        card.innerHTML = `
+            ${equipped ? '<div class="wpn-tag tag-equipped">TERPASANG</div>' : owned ? '<div class="wpn-tag tag-owned">MILIKMU</div>' : ''}
+            <div class="wpn-name">${wpn.name}</div>
+            <div class="wpn-stat"><span>Kerusakan</span><span>${wpn.damage}</span></div>
+            <div class="wpn-stat"><span>Zoom</span><span>${wpn.zoom}x</span></div>
+            <div class="wpn-stat"><span>Magazen</span><span>${wpn.clipSize}</span></div>
+            <div class="wpn-stat"><span>Kecepatan</span><span>${(1/wpn.fireRate).toFixed(1)}/s</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px">${wpn.desc}</div>
+            ${!owned ? `<div class="wpn-price"><i class="fas fa-coins"></i> ${wpn.price}</div>` : ''}
+        `;
+        if (canBuy) {
+            card.onclick = () => buyWeapon(id);
+        } else if (owned && !equipped) {
+            card.onclick = () => equipWeapon(id);
+        }
+        grid.appendChild(card);
+    }
+}
+
+function buyWeapon(id) {
+    const wpn = WEAPONS[id];
+    if (G.money >= wpn.price && !G.ownedWeapons.includes(id)) {
+        G.money -= wpn.price;
+        G.ownedWeapons.push(id);
+        equipWeapon(id);
+        document.getElementById('shopMoney').textContent = G.money;
+        renderShop();
+    }
+}
+
+function equipWeapon(id) {
+    if (!G.ownedWeapons.includes(id)) return;
+    G.player.weapon = id;
+    const wpn = WEAPONS[id];
+    G.player.maxAmmo = wpn.clipSize;
+    G.player.ammo = wpn.clipSize;
+    G.player.reloading = false;
+    G.player.reloadTimer = 0;
+    renderShop();
+}
+
+function closeShop() {
+    G.state = 'playing';
+    document.getElementById('shopScreen').classList.add('hidden');
+    G.waveTimer = 2;
+    updateHUD();
+}
+
+/* ============================================================
+   LATAR BELAKANG
+   ============================================================ */
+function generateBackground() {
+    G.bgElements = [];
+    if (G.location === 'forest') {
+        // Pohon latar belakang
+        for (let i = 0; i < 12; i++) {
+            G.bgElements.push({
+                type: 'tree_bg',
+                x: Math.random() * W,
+                y: H * 0.25 + Math.random() * H * 0.55,
+                size: 30 + Math.random() * 50,
+                shade: Math.random() * 0.3
+            });
+        }
+        // Pohon depan (di bawah viewport)
+        for (let i = 0; i < 6; i++) {
+            G.bgElements.push({
+                type: 'tree_fg',
+                x: Math.random() * W,
+                size: 80 + Math.random() * 60,
+                shade: Math.random() * 0.2
+            });
+        }
+    } else {
+        // Gedung-gedung kota
+        const buildings = [];
+        let bx = -20;
+        while (bx < W + 50) {
+            const bw = 40 + Math.random() * 80;
+            const bh = 80 + Math.random() * 200;
+            buildings.push({ x: bx, w: bw, h: bh, windows: [] });
+            // Jendela
+            for (let wy = 15; wy < bh - 20; wy += 25) {
+                for (let wx = 8; wx < bw - 12; wx += 18) {
+                    if (Math.random() > 0.3) {
+                        buildings[buildings.length - 1].windows.push({
+                            x: wx, y: wy, lit: Math.random() > 0.4,
+                            color: Math.random() > 0.5 ? '#ffdd66' : '#ffaa33'
+                        });
+                    }
+                }
+            }
+            bx += bw + 2 + Math.random() * 10;
+        }
+        G.bgElements.push({ type: 'cityscape', buildings });
+    }
+}
+
+function drawBackground() {
+    if (G.location === 'forest') {
+        // Langit hutan
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+        skyGrad.addColorStop(0, '#0d1a0d');
+        skyGrad.addColorStop(0.3, '#142814');
+        skyGrad.addColorStop(1, '#0a1a0a');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Sinar cahaya menembus kanopi
+        ctx.save();
+        ctx.globalAlpha = 0.04;
+        for (let i = 0; i < 5; i++) {
+            const sx = W * 0.15 + i * W * 0.18;
+            ctx.beginPath();
+            ctx.moveTo(sx - 20, 0);
+            ctx.lineTo(sx + 30, H);
+            ctx.lineTo(sx + 60, H);
+            ctx.lineTo(sx + 10, 0);
+            ctx.closePath();
+            ctx.fillStyle = '#88ff88';
+            ctx.fill();
+        }
+        ctx.restore();
+
+        // Pohon latar
+        G.bgElements.filter(e => e.type === 'tree_bg').forEach(t => {
+            drawTreeBg(t.x, t.y, t.size, t.shade);
+        });
+
+        // Tanah
+        ctx.fillStyle = '#1a2e1a';
+        ctx.fillRect(0, H * 0.82, W, H * 0.18);
+        // Semak-semak
+        for (let i = 0; i < 20; i++) {
+            const bx = (i / 20) * W + Math.sin(i * 3.7) * 30;
+            const by = H * 0.82 + Math.sin(i * 2.1) * 8;
+            ctx.beginPath();
+            ctx.ellipse(bx, by, 20 + Math.sin(i) * 10, 12 + Math.cos(i) * 5, 0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgb(${25 + Math.sin(i)*10},${50 + Math.cos(i)*15},${25 + Math.sin(i)*10})`;
+            ctx.fill();
+        }
+
+        // Kanopi depan (bagian bawah)
+        G.bgElements.filter(e => e.type === 'tree_fg').forEach(t => {
+            drawTreeFg(t.x, t.size, t.shade);
+        });
+
+    } else {
+        // Langit kota malam
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+        skyGrad.addColorStop(0, '#0a0a1e');
+        skyGrad.addColorStop(0.5, '#12122a');
+        skyGrad.addColorStop(1, '#1a1a2e');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Bintang - lebih banyak dan HD
+        for (let i = 0; i < 150; i++) {
+            const sx = (Math.sin(i * 127.1) * 0.5 + 0.5) * W;
+            const sy = (Math.sin(i * 311.7) * 0.5 + 0.5) * H * 0.4;
+            const ss = 0.5 + Math.sin(G.time * 2 + i) * 0.5;
+            const size = 0.5 + (i % 3) * 0.8;
+            ctx.globalAlpha = 0.2 + ss * 0.7;
+            ctx.fillStyle = i % 4 === 0 ? '#ffffdd' : '#ffffff';
+            ctx.beginPath();
+            ctx.arc(sx, sy, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        // Gedung-gedung
+        const cs = G.bgElements.find(e => e.type === 'cityscape');
+        if (cs) {
+            const groundY = H * 0.88;
+            cs.buildings.forEach(b => {
+                const by = groundY - b.h;
+                // Badan gedung dengan gradient
+                const buildingGrad = ctx.createLinearGradient(b.x, by, b.x, by + b.h);
+                buildingGrad.addColorStop(0, '#1a1a2a');
+                buildingGrad.addColorStop(1, '#0a0a15');
+                ctx.fillStyle = buildingGrad;
+                ctx.fillRect(b.x, by, b.w, b.h);
+                // Border HD
+                ctx.strokeStyle = '#2a2a4a';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(b.x, by, b.w, b.h);
+                // Jendela dengan efek lebih HD
+                b.windows.forEach(w => {
+                    if (w.lit) {
+                        ctx.fillStyle = w.color;
+                        ctx.globalAlpha = 0.7 + Math.sin(G.time + w.x * 0.1) * 0.25;
+                        ctx.fillRect(b.x + w.x, by + w.y, 10, 14);
+                        // Glow effect
+                        ctx.shadowColor = w.color;
+                        ctx.shadowBlur = 8;
+                        ctx.globalAlpha = 0.1 + Math.sin(G.time + w.x * 0.1) * 0.1;
+                        ctx.fillRect(b.x + w.x - 2, by + w.y - 2, 14, 18);
+                        ctx.shadowBlur = 0;
+                        ctx.globalAlpha = 1;
+                    } else {
+                        ctx.fillStyle = '#0a0a15';
+                        ctx.fillRect(b.x + w.x, by + w.y, 10, 14);
+                        ctx.strokeStyle = '#1a1a2a';
+                        ctx.lineWidth = 0.5;
+                        ctx.strokeRect(b.x + w.x, by + w.y, 10, 14);
+                    }
+                });
+            });
+            // Tanah dengan gradient
+            const groundGrad = ctx.createLinearGradient(0, groundY, 0, H);
+            groundGrad.addColorStop(0, '#1a1a2a');
+            groundGrad.addColorStop(1, '#0a0a15');
+            ctx.fillStyle = groundGrad;
+            ctx.fillRect(0, groundY, W, H - groundY);
+            // Garis jalan - HD
+            ctx.strokeStyle = '#3a3a5a';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([20, 15]);
+            ctx.beginPath();
+            ctx.moveTo(0, groundY + 15);
+            ctx.lineTo(W, groundY + 15);
+            ctx.stroke();
+            // Glow pada garis jalan
+            ctx.strokeStyle = 'rgba(100,100,200,0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, groundY + 14);
+            ctx.lineTo(W, groundY + 14);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+    }
+}
+
+function drawTreeBg(x, y, size, shade) {
+    const g = 30 + shade * 40;
+    ctx.fillStyle = `rgb(${10+shade*20},${g+20},${10+shade*15})`;
+    ctx.beginPath();
+    ctx.ellipse(x, y, size * 0.8, size * 1.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = `rgb(${15+shade*20},${g+30},${15+shade*15})`;
+    ctx.beginPath();
+    ctx.ellipse(x - size * 0.2, y - size * 0.3, size * 0.5, size * 0.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawTreeFg(x, size, shade) {
+    const baseY = H;
+    // Batang
+    ctx.fillStyle = '#1a1208';
+    ctx.fillRect(x - size * 0.08, baseY - size * 1.5, size * 0.16, size * 1.5);
+    // Dedaunan besar yang menutupi bagian bawah
+    ctx.fillStyle = `rgba(${8+shade*15},${25+shade*20},${8+shade*10},0.95)`;
+    ctx.beginPath();
+    ctx.ellipse(x, baseY - size * 0.3, size * 1.2, size * 0.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = `rgba(${10+shade*15},${30+shade*25},${10+shade*10},0.9)`;
+    ctx.beginPath();
+    ctx.ellipse(x + size * 0.3, baseY - size * 0.1, size * 0.8, size * 0.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/* ============================================================
+   SISTEM GELOMBANG
+   ============================================================ */
+function getWaveConfig(wave) {
+    const count = Math.min(2 + wave, 10);
+    const shooters = Math.min(Math.max(3, Math.floor(wave / 2) + 1), 6);
+    const hp = 40 + wave * 15;
+    const reward = 50 + wave * 15;
+    return { count, shooters, hp, reward };
+}
+
+function spawnWave() {
+    G.wave++;
+    const cfg = getWaveConfig(G.wave);
+    const margin = 60;
+    const spawnArea = {
+        left: margin,
+        right: W - margin,
+        top: margin,
+        bottom: H * 0.75
+    };
+
+    for (let i = 0; i < cfg.count; i++) {
+        let ex, ey, attempts = 0;
+        // Cari posisi yang tidak tumpang tindih
+        do {
+            ex = spawnArea.left + Math.random() * (spawnArea.right - spawnArea.left);
+            ey = spawnArea.top + Math.random() * (spawnArea.bottom - spawnArea.top);
+            attempts++;
+        } while (attempts < 50 && G.enemies.some(e => Math.hypot(e.x - ex, e.y - ey) < 60));
+
+        const isShooter = i < cfg.shooters;
+        G.enemies.push({
+            x: ex, y: ey,
+            hp: cfg.hp,
+            maxHp: cfg.hp,
+            isShooter: isShooter,
+            shootTimer: 3 + Math.random() * 3,
+            shootInterval: isShooter ? (4.5 - Math.min(G.wave * 0.2, 2)) : 999,
+            shooting: false,
+            shootWarningTimer: 0,
+            targetX: W / 2,
+            targetY: H / 2,
+            moveTimer: 0,
+            moveDir: Math.random() * Math.PI * 2,
+            speed: 15 + Math.random() * 20,
+            alive: true,
+            deathTimer: 0,
+            hitFlash: 0,
+            bobPhase: Math.random() * Math.PI * 2
+        });
+    }
+    updateHUD();
+}
+
+/* ============================================================
+   TEMBAKAN PEMAIN
+   ============================================================ */
+function tryShoot() {
+    const p = G.player;
+    const wpn = WEAPONS[p.weapon];
+    if (p.reloading || p.fireCooldown > 0 || p.ammo <= 0 || p.dodging) return;
+
+    // Cek apakah ada musuh di dekat crosshair
+    const zoom = wpn.zoom;
+    const hitRadius = 30 / zoom;
+    let hitEnemy = null;
+    let minDist = Infinity;
+
+    G.enemies.forEach(e => {
+        if (!e.alive) return;
+        const d = Math.hypot(e.x - mouse.x, e.y - mouse.y);
+        if (d < hitRadius && d < minDist) {
+            minDist = d;
+            hitEnemy = e;
+        }
+    });
+
+    // Efek tembak
+    p.ammo--;
+    p.fireCooldown = wpn.fireRate;
+    G.muzzleFlash = 0.15;
+    G.screenShake.intensity = 4;
+    G.scopeRotation = (Math.random() - 0.5) * 0.03;
+
+    // Garis peluru
+    G.playerBullets.push({
+        x1: W / 2, y1: H - 40,
+        x2: mouse.x, y2: mouse.y,
+        timer: 0.12
+    });
+
+    if (hitEnemy) {
+        hitEnemy.hp -= wpn.damage;
+        hitEnemy.hitFlash = 0.15;
+        // Partikel darah
+        spawnParticles(hitEnemy.x, hitEnemy.y, 8, '#cc2222', 80, 1.5);
+        spawnParticles(hitEnemy.x, hitEnemy.y, 4, '#ff6644', 50, 1);
+
+        if (hitEnemy.hp <= 0) {
+            killEnemy(hitEnemy);
+        } else {
+            addFloatingText(hitEnemy.x, hitEnemy.y - 30, '-' + wpn.damage, '#ff4444');
+        }
+    } else {
+        // Peluru mengenai tanah
+        spawnParticles(mouse.x, mouse.y, 5, '#888866', 40, 0.8);
+    }
+
+    if (p.ammo <= 0) tryReload();
+    updateHUD();
+}
+
+function tryReload() {
+    const p = G.player;
+    const wpn = WEAPONS[p.weapon];
+    if (p.reloading || p.ammo >= wpn.clipSize) return;
+    p.reloading = true;
+    p.reloadTimer = wpn.reloadTime;
+    updateHUD();
+}
+
+/* ============================================================
+   TEMBAKAN MUSUH
+   ============================================================ */
+function enemyStartShooting(enemy) {
+    // Hitung posisi prediksi pemain
+    enemy.targetX = W / 2 + (Math.random() - 0.5) * 60;
+    enemy.targetY = H - 40 + (Math.random() - 0.5) * 30;
+    enemy.shootWarningTimer = 2.0; // 2 detik peringatan
+    enemy.shooting = true;
+}
+
+function enemyFire(enemy) {
+    // Peluru menuju posisi target
+    const angle = Math.atan2(enemy.targetY - enemy.y, enemy.targetX - enemy.x);
+    G.bullets.push({
+        x: enemy.x, y: enemy.y,
+        vx: Math.cos(angle) * 400,
+        vy: Math.sin(angle) * 400,
+        damage: 15 + G.wave * 2,
+        timer: 3,
+        trail: []
+    });
+    spawnParticles(enemy.x, enemy.y, 3, '#ffaa00', 30, 0.5);
+    enemy.shooting = false;
+}
+
+/* ============================================================
+   MENGHINDAR (DODGE)
+   ============================================================ */
+function tryDodge() {
+    const p = G.player;
+    if (p.dodging || G.state !== 'playing') return;
+    p.dodging = true;
+    p.dodgeTimer = 0.6;
+    p.invulnerable = true;
+}
+
+/* ============================================================
+   KILL & REWARD
+   ============================================================ */
+function killEnemy(enemy) {
+    enemy.alive = false;
+    enemy.deathTimer = 1.0;
+    const cfg = getWaveConfig(G.wave);
+    G.money += cfg.reward;
+    G.score += cfg.reward * 2;
+    G.totalKills++;
+    spawnParticles(enemy.x, enemy.y, 15, '#cc2222', 100, 2);
+    spawnParticles(enemy.x, enemy.y, 8, '#ff4444', 70, 1.5);
+    addFloatingText(enemy.x, enemy.y - 40, '+' + cfg.reward, '#ffaa00');
+    updateHUD();
+}
+
+/* ============================================================
+   PARTIKEL & EFEK
+   ============================================================ */
+function spawnParticles(x, y, count, color, speed, life) {
+    for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = Math.random() * speed;
+        G.particles.push({
+            x, y,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd - Math.random() * 30,
+            life: life * (0.5 + Math.random() * 0.5),
+            maxLife: life,
+            color,
+            size: 2 + Math.random() * 3
+        });
+    }
+}
+
+function addFloatingText(x, y, text, color) {
+    G.floatingTexts.push({ x, y, text, color, timer: 1.2, maxTimer: 1.2 });
+}
+
+/* ============================================================
+   UPDATE LOGIK
+   ============================================================ */
+function update(dt) {
+    if (G.state !== 'playing') return;
+    G.time += dt;
+    const p = G.player;
+
+    // Cooldown tembak
+    if (p.fireCooldown > 0) p.fireCooldown -= dt;
+
+    // Reload
+    if (p.reloading) {
+        p.reloadTimer -= dt;
+        if (p.reloadTimer <= 0) {
+            p.reloading = false;
+            p.ammo = WEAPONS[p.weapon].clipSize;
+            updateHUD();
+        }
+    }
+
+    // Dodge
+    if (p.dodging) {
+        p.dodgeTimer -= dt;
+        if (p.dodgeTimer <= 0) {
+            p.dodging = false;
+            p.invulnerable = false;
+        }
+    }
+
+    // Muzzle flash
+    if (G.muzzleFlash > 0) G.muzzleFlash -= dt;
+
+    // Screen shake
+    if (G.screenShake.intensity > 0) {
+        G.screenShake.x = (Math.random() - 0.5) * G.screenShake.intensity * 2;
+        G.screenShake.y = (Math.random() - 0.5) * G.screenShake.intensity * 2;
+        G.screenShake.intensity *= 0.9;
+        if (G.screenShake.intensity < 0.2) G.screenShake.intensity = 0;
+    }
+
+    // Scope rotation recovery
+    G.scopeRotation *= 0.92;
+
+    // Tembak saat klik
+    if (mouse.down) {
+        mouse.down = false; // Semi-auto
+        tryShoot();
+    }
+
+    // Update musuh
+    let aliveCount = 0;
+    G.enemies.forEach(e => {
+        if (!e.alive) {
+            e.deathTimer -= dt;
+            return;
+        }
+        aliveCount++;
+
+        // Pergerakan acak
+        e.bobPhase += dt * 2;
+        e.moveTimer -= dt;
+        if (e.moveTimer <= 0) {
+            e.moveDir = Math.random() * Math.PI * 2;
+            e.moveTimer = 1 + Math.random() * 2;
+        }
+        e.x += Math.cos(e.moveDir) * e.speed * dt;
+        e.y += Math.sin(e.moveDir) * e.speed * dt * 0.5;
+
+        // Batasan area
+        const m = 50;
+        e.x = Math.max(m, Math.min(W - m, e.x));
+        e.y = Math.max(m, Math.min(H * 0.75, e.y));
+
+        // Hit flash
+        if (e.hitFlash > 0) e.hitFlash -= dt;
+
+        // Tembakan musuh
+        if (e.isShooter) {
+            if (!e.shooting) {
+                e.shootTimer -= dt;
+                if (e.shootTimer <= 0) {
+                    enemyStartShooting(e);
+                }
+            } else {
+                e.shootWarningTimer -= dt;
+                if (e.shootWarningTimer <= 0) {
+                    enemyFire(e);
+                    e.shootTimer = e.shootInterval;
+                }
+            }
+        }
+    });
+
+    // Update peluru musuh
+    G.bullets.forEach(b => {
+        b.trail.push({ x: b.x, y: b.y });
+        if (b.trail.length > 8) b.trail.shift();
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        b.timer -= dt;
+
+        // Cek kena pemain
+        if (!p.invulnerable && !p.dodging) {
+            const px = W / 2, py = H - 40;
+            if (Math.hypot(b.x - px, b.y - py) < 30) {
+                p.hp -= b.damage;
+                G.screenShake.intensity = 8;
+                spawnParticles(px, py, 6, '#ff3344', 50, 1);
+                addFloatingText(px, py - 30, '-' + b.damage, '#ff3344');
+                b.timer = 0;
+                updateHUD();
+                if (p.hp <= 0) {
+                    gameOver();
+                    return;
+                }
+            }
+        }
+    });
+    G.bullets = G.bullets.filter(b => b.timer > 0 && b.x > -50 && b.x < W + 50 && b.y > -50 && b.y < H + 50);
+
+    // Update efek peluru pemain
+    G.playerBullets.forEach(b => b.timer -= dt);
+    G.playerBullets = G.playerBullets.filter(b => b.timer > 0);
+
+    // Update partikel
+    G.particles.forEach(pt => {
+        pt.x += pt.vx * dt;
+        pt.y += pt.vy * dt;
+        pt.vy += 150 * dt; // gravitasi
+        pt.life -= dt;
+    });
+    G.particles = G.particles.filter(pt => pt.life > 0);
+
+    // Update floating text
+    G.floatingTexts.forEach(ft => {
+        ft.timer -= dt;
+        ft.y -= 40 * dt;
+    });
+    G.floatingTexts = G.floatingTexts.filter(ft => ft.timer > 0);
+
+    // Cek wave selesai
+    if (aliveCount === 0 && G.wave > 0) {
+        G.waveClearTimer += dt;
+        if (G.waveClearTimer > 1.5) {
+            G.waveClearTimer = 0;
+            openShop();
+            return;
+        }
+    }
+
+    // Spawn wave baru
+    if (aliveCount === 0) {
+        G.waveTimer -= dt;
+        if (G.waveTimer <= 0) spawnWave();
+    }
+
+    // Update dodge bar HUD
+    updateHUD();
+}
+
+function gameOver() {
+    G.state = 'gameover';
+    document.getElementById('goWave').textContent = G.wave;
+    document.getElementById('goScore').textContent = G.score;
+    document.getElementById('goKills').textContent = G.totalKills;
+    document.getElementById('gameOverScreen').classList.remove('hidden');
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('dodgeBar').classList.add('hidden');
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render() {
+    ctx.save();
+
+    // Screen shake
+    if (G.screenShake.intensity > 0) {
+        ctx.translate(G.screenShake.x, G.screenShake.y);
+    }
+
+    // Latar belakang
+    drawBackground();
+
+    // Garis tembak pemain
+    G.playerBullets.forEach(b => {
+        const alpha = b.timer / 0.12;
+        ctx.strokeStyle = `rgba(255,255,200,${alpha * 0.8})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(b.x1, b.y1);
+        ctx.lineTo(b.x2, b.y2);
+        ctx.stroke();
+        // Flash di ujung
+        ctx.beginPath();
+        ctx.arc(b.x2, b.y2, 4, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,200,${alpha})`;
+        ctx.fill();
+    });
+
+    // Musuh
+    G.enemies.forEach(e => {
+        if (!e.alive && e.deathTimer <= 0) return;
+        drawEnemy(e);
+    });
+
+    // Tanda peringatan tembak musuh
+    G.enemies.forEach(e => {
+        if (!e.alive || !e.shooting) return;
+        drawWarningMarker(e);
+    });
+
+    // Efek merah di kedua sisi layar saat helikopter menembak
+    G.enemies.forEach(e => {
+        if (!e.alive || !e.shooting) return;
+        const progress = 1 - (e.shootWarningTimer / 2.0);
+        if (progress > 0) {
+            const alpha = Math.min(0.9, progress * 0.9); // Merah muncul semakin dekat dengan tembakan (cerah)
+            const width = 50 + progress * 30; // Lebar strip merah bertambah
+            // Merah di sisi kiri
+            ctx.fillStyle = `rgba(255, 30, 30, ${alpha})`;
+            ctx.fillRect(0, 0, width, H);
+            // Merah di sisi kanan
+            ctx.fillRect(W - width, 0, width, H);
+        }
+    });
+
+    // Peluru musuh - HD dengan glow effect
+    G.bullets.forEach(b => {
+        // Trail dengan gradient
+        if (b.trail.length > 1) {
+            for (let i = 1; i < b.trail.length; i++) {
+                const alpha = i / b.trail.length * 0.7;
+                const lineGrad = ctx.createLinearGradient(b.trail[i-1].x, b.trail[i-1].y, b.trail[i].x, b.trail[i].y);
+                lineGrad.addColorStop(0, `rgba(255,200,0,${alpha * 0.5})`);
+                lineGrad.addColorStop(1, `rgba(255,170,0,${alpha})`);
+                ctx.strokeStyle = lineGrad;
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(b.trail[i-1].x, b.trail[i-1].y);
+                ctx.lineTo(b.trail[i].x, b.trail[i].y);
+                ctx.stroke();
+            }
+        }
+        // Peluru dengan multiple glow layers
+        ctx.shadowColor = 'rgba(255,200,0,0.8)';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = '#ffdd00';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        // Inner core
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+        // Outer glow
+        ctx.strokeStyle = 'rgba(255,220,0,0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 8, 0, Math.PI * 2);
+        ctx.stroke();
+    });
+
+    // Partikel - HD dengan glow dan shapes lebih realistis
+    G.particles.forEach(pt => {
+        const alpha = pt.life / pt.maxLife;
+        ctx.globalAlpha = alpha;
+        
+        // Glow layer
+        ctx.shadowColor = pt.color;
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Core yang lebih terang
+        ctx.shadowBlur = 0;
+        const coreAlpha = Math.min(1, alpha * 1.5);
+        ctx.globalAlpha = coreAlpha;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = 'transparent';
+
+    // Floating text - HD dengan glow
+    G.floatingTexts.forEach(ft => {
+        const alpha = ft.timer / ft.maxTimer;
+        ctx.globalAlpha = alpha;
+        ctx.font = 'bold 20px Orbitron';
+        ctx.fillStyle = ft.color;
+        ctx.textAlign = 'center';
+        ctx.shadowColor = ft.color;
+        ctx.shadowBlur = 10;
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.shadowBlur = 0;
+    });
+    ctx.globalAlpha = 1;
+
+    // Posisi pemain (siluet sniper di bawah)
+    drawPlayerSilhouette();
+
+    // Muzzle flash
+    if (G.muzzleFlash > 0) {
+        const alpha = G.muzzleFlash / 0.15;
+        ctx.beginPath();
+        ctx.arc(W/2, H - 40, 30 * alpha, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,200,${alpha * 0.5})`;
+        ctx.fill();
+    }
+
+    // Scope overlay
+    drawScope();
+
+    // Crosshair
+    drawCrosshair();
+
+    // Indikator dodging
+    if (G.player.dodging) {
+        ctx.fillStyle = 'rgba(0,255,136,0.06)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.font = '700 14px Orbitron';
+        ctx.fillStyle = 'rgba(0,255,136,0.6)';
+        ctx.textAlign = 'center';
+        ctx.fillText('MENGHINDAR', W/2, H/2 + 60);
+    }
+
+    // Wave clear text
+    if (G.waveClearTimer > 0 && G.waveClearTimer < 1.5 && G.state === 'playing') {
+        const alpha = Math.min(1, G.waveClearTimer / 0.5);
+        ctx.globalAlpha = alpha;
+        ctx.font = '900 36px Orbitron';
+        ctx.fillStyle = '#00ff88';
+        ctx.textAlign = 'center';
+        ctx.fillText('GELOMBANG SELESAI', W/2, H/2 - 20);
+        ctx.font = '500 16px Rajdhani';
+        ctx.fillStyle = '#88ccaa';
+        ctx.fillText('Membuka toko senjata...', W/2, H/2 + 15);
+        ctx.globalAlpha = 1;
+    }
+
+    // Pesan awal
+    if (G.wave === 0 && G.state === 'playing') {
+        ctx.font = '700 24px Orbitron';
+        ctx.fillStyle = '#00ff88';
+        ctx.textAlign = 'center';
+        ctx.fillText('BERSIAP', W/2, H/2 - 10);
+        ctx.font = '500 14px Rajdhani';
+        ctx.fillStyle = '#5a8a6a';
+        ctx.fillText('Musuh mendekat...', W/2, H/2 + 20);
+    }
+
+    // Reset shadow state
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.restore();
+}
+
+function drawEnemy(e) {
+    const alpha = e.alive ? 1 : e.deathTimer;
+    ctx.globalAlpha = alpha;
+
+    const bobY = e.alive ? Math.sin(e.bobPhase) * 4 : 0;
+    const ex = e.x, ey = e.y + bobY;
+    const scale = 1.5; // Skala helikopter
+
+    // Bayangan
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.beginPath();
+    ctx.ellipse(ex, ey + 45 * scale, 32 * scale, 12 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Badan helikopter (fuselage) - lebih besar dan detail
+    const bodyColor = e.hitFlash > 0 ? '#ff5555' : '#2d5a3d';
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, 20 * scale, 13 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Highlight pada fuselage
+    ctx.fillStyle = e.hitFlash > 0 ? '#ff7777' : '#4a8a5a';
+    ctx.beginPath();
+    ctx.ellipse(ex - 2 * scale, ey - 4 * scale, 8 * scale, 6 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cockpit helikopter - lebih detail
+    ctx.fillStyle = e.hitFlash > 0 ? '#ff7777' : '#4a8a5a';
+    ctx.beginPath();
+    ctx.ellipse(ex - 7 * scale, ey - 10 * scale, 10 * scale, 8 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Jendela cockpit depan - besar dan jelas
+    ctx.fillStyle = '#0a2050';
+    ctx.beginPath();
+    ctx.ellipse(ex - 7 * scale, ey - 10 * scale, 7 * scale, 5 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Refleksi di jendela
+    ctx.fillStyle = 'rgba(150, 200, 255, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(ex - 9 * scale, ey - 12 * scale, 3 * scale, 2 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Boom ekor yang lebih panjang
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 4 * scale;
+    ctx.beginPath();
+    ctx.moveTo(ex + 18 * scale, ey - 2 * scale);
+    ctx.quadraticCurveTo(ex + 28 * scale, ey - 8 * scale, ex + 32 * scale, ey - 5 * scale);
+    ctx.stroke();
+
+    // Tail boom connection
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.ellipse(ex + 18 * scale, ey - 2 * scale, 3 * scale, 3 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Tail rotor yang lebih besar
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 3 * scale;
+    const tailRotation = G.time * 15;
+    ctx.save();
+    ctx.translate(ex + 32 * scale, ey - 5 * scale);
+    ctx.rotate(tailRotation);
+    ctx.beginPath();
+    ctx.moveTo(-5 * scale, 0);
+    ctx.lineTo(5 * scale, 0);
+    ctx.stroke();
+    // Tail rotor blade kedua
+    ctx.beginPath();
+    ctx.moveTo(0, -4 * scale);
+    ctx.lineTo(0, 4 * scale);
+    ctx.stroke();
+    ctx.restore();
+
+    // Main rotor (baling-baling utama) - lebih besar dan realistis
+    ctx.save();
+    ctx.translate(ex, ey - 14 * scale);
+    ctx.rotate(G.time * 20);
+    
+    // Blade rotor 1
+    ctx.fillStyle = '#555';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 3 * scale, 24 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Blade rotor 2
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 24 * scale, 3 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Shading pada rotor blade
+    ctx.fillStyle = '#777';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 2 * scale, 22 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Hub rotor
+    ctx.fillStyle = '#666';
+    ctx.beginPath();
+    ctx.arc(0, 0, 5 * scale, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+
+    // Landing gear/skid yang lebih realistis
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 3.5 * scale;
+    ctx.lineCap = 'round';
+    // Skid kiri
+    ctx.beginPath();
+    ctx.moveTo(ex - 14 * scale, ey + 10 * scale);
+    ctx.lineTo(ex - 14 * scale, ey + 28 * scale);
+    ctx.stroke();
+    // Skid kanan
+    ctx.beginPath();
+    ctx.moveTo(ex + 14 * scale, ey + 10 * scale);
+    ctx.lineTo(ex + 14 * scale, ey + 28 * scale);
+    ctx.stroke();
+    
+    // Cross bar antara skid
+    ctx.beginPath();
+    ctx.moveTo(ex - 14 * scale, ey + 26 * scale);
+    ctx.lineTo(ex + 14 * scale, ey + 26 * scale);
+    ctx.stroke();
+
+    // Senjata (missile pod) - jika shooter dan lebih besar
+    if (e.isShooter) {
+        // Pod kiri
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(ex - 24 * scale, ey - 4 * scale, 10 * scale, 4 * scale);
+        ctx.fillRect(ex - 24 * scale, ey + 2 * scale, 10 * scale, 4 * scale);
+        ctx.fillRect(ex - 24 * scale, ey + 8 * scale, 10 * scale, 4 * scale);
+        
+        // Pod kanan
+        ctx.fillRect(ex + 14 * scale, ey - 4 * scale, 10 * scale, 4 * scale);
+        ctx.fillRect(ex + 14 * scale, ey + 2 * scale, 10 * scale, 4 * scale);
+        ctx.fillRect(ex + 14 * scale, ey + 8 * scale, 10 * scale, 4 * scale);
+        
+        // Indikator peluru di pod
+        ctx.fillStyle = '#555';
+        ctx.beginPath();
+        ctx.arc(ex - 19 * scale, ey - 2 * scale, 2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ex - 19 * scale, ey + 4 * scale, 2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ex - 19 * scale, ey + 10 * scale, 2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(ex + 19 * scale, ey - 2 * scale, 2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ex + 19 * scale, ey + 4 * scale, 2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ex + 19 * scale, ey + 10 * scale, 2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Indikator siap menembak
+        if (e.shooting) {
+            ctx.fillStyle = '#ff4444';
+            const pulse = Math.sin(G.time * 8) * 0.5 + 0.5;
+            ctx.globalAlpha = 0.5 + pulse * 0.5;
+            ctx.beginPath();
+            ctx.arc(ex - 19 * scale, ey - 2 * scale, 3.5 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(ex + 19 * scale, ey - 2 * scale, 3.5 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // Bar HP yang lebih besar (tetap dengan ukuran besar untuk visibility)
+    if (e.alive && e.hp < e.maxHp) {
+        const barW = 50 * 1.8;
+        const barH = 5 * 1.8;
+        const bx = ex - barW/2;
+        const by = ey - 32 * scale;
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(bx, by, barW, barH);
+        const pct = Math.max(0, e.hp / e.maxHp);
+        ctx.fillStyle = pct > 0.5 ? '#00ff88' : pct > 0.25 ? '#ffaa00' : '#ff3344';
+        ctx.fillRect(bx, by, barW * pct, barH);
+        // Border HD dengan glow
+        ctx.shadowColor = pct > 0.5 ? 'rgba(0,255,136,0.6)' : pct > 0.25 ? 'rgba(255,170,0,0.6)' : 'rgba(255,50,80,0.6)';
+        ctx.shadowBlur = 6;
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(bx, by, barW, barH);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+    }
+
+    ctx.globalAlpha = 1;
+}
+
+function drawWarningMarker(e) {
+    const tx = e.targetX, ty = e.targetY;
+    const progress = 1 - (e.shootWarningTimer / 2.0);
+    const pulse = Math.sin(G.time * 12) * 0.3 + 0.7;
+    const radius = 25 + progress * 15;
+
+    ctx.shadowColor = 'rgba(255,50,50,0.8)';
+    ctx.shadowBlur = 10;
+
+    // Lingkaran peringatan - outer HD
+    ctx.strokeStyle = `rgba(255,80,80,${pulse * (0.7 + progress * 0.3)})`;
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.arc(tx, ty, radius + 5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Lingkaran peringatan - main
+    ctx.strokeStyle = `rgba(255,100,100,${pulse * (0.5 + progress * 0.5)})`;
+    ctx.lineWidth = 3;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.arc(tx, ty, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Lingkaran dalam yang mengecil (timer visual)
+    ctx.strokeStyle = `rgba(255,60,60,${pulse * 0.9})`;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(tx, ty, radius * (1 - progress), 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Tanda silang - lebih tebal
+    const cs = 12;
+    ctx.strokeStyle = `rgba(255,100,100,${pulse * 0.95})`;
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(tx - cs, ty - cs); 
+    ctx.lineTo(tx + cs, ty + cs);
+    ctx.moveTo(tx + cs, ty - cs); 
+    ctx.lineTo(tx - cs, ty + cs);
+    ctx.stroke();
+
+    // Teks "BAHAYA" dengan glow
+    if (progress > 0.3) {
+        ctx.font = 'bold 14px Orbitron';
+        ctx.fillStyle = `rgba(255,100,100,${pulse})`;
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(255,50,50,0.8)';
+        ctx.shadowBlur = 8;
+        ctx.fillText('BAHAYA', tx, ty - radius - 10);
+        ctx.shadowBlur = 0;
+    }
+
+    // Garis dari musuh ke target - HD dengan gradient
+    const lineGrad = ctx.createLinearGradient(e.x, e.y, tx, ty);
+    lineGrad.addColorStop(0, `rgba(255,80,80,0.2)`);
+    lineGrad.addColorStop(0.5, `rgba(255,100,100,${0.2 + progress * 0.3})`);
+    lineGrad.addColorStop(1, `rgba(255,50,50,${0.1 + progress * 0.3})`);
+    ctx.strokeStyle = lineGrad;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 7]);
+    ctx.beginPath();
+    ctx.moveTo(e.x, e.y);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+}
+
+function drawPlayerSilhouette() {
+    const px = W / 2, py = H - 40;
+    const p = G.player;
+    const alpha = p.dodging ? 0.2 : 0.7;
+
+    ctx.globalAlpha = alpha;
+    // Badan
+    ctx.fillStyle = '#0a1a0a';
+    ctx.beginPath();
+    ctx.roundRect(px - 20, py - 15, 40, 35, 5);
+    ctx.fill();
+    // Kepala
+    ctx.beginPath();
+    ctx.arc(px, py - 24, 12, 0, Math.PI * 2);
+    ctx.fill();
+    // Senjata
+    ctx.fillStyle = '#111';
+    ctx.save();
+    ctx.translate(px + 15, py - 5);
+    const aimAngle = Math.atan2(mouse.y - py, mouse.x - px);
+    ctx.rotate(aimAngle);
+    ctx.fillRect(0, -3, 50, 6);
+    // Scope di senjata
+    ctx.fillRect(20, -7, 12, 4);
+    ctx.restore();
+
+    ctx.globalAlpha = 1;
+}
+
+function drawScope() {
+    const wpn = WEAPONS[G.player.weapon];
+    const zoom = wpn.zoom;
+    const scopeR = Math.min(W, H) * 0.42 / zoom;
+    const scopeCenterX = mouse.x;
+    const scopeCenterY = mouse.y;
+
+    // Area gelap di luar scope
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.beginPath();
+    ctx.rect(0, 0, W, H);
+    ctx.arc(scopeCenterX, scopeCenterY, scopeR, 0, Math.PI * 2, true);
+    ctx.fill();
+    ctx.restore();
+
+    // Lingkaran scope
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(scopeCenterX, scopeCenterY, scopeR, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Edge vignette dalam scope
+    const vigGrad = ctx.createRadialGradient(scopeCenterX, scopeCenterY, scopeR * 0.7, scopeCenterX, scopeCenterY, scopeR);
+    vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    vigGrad.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = vigGrad;
+    ctx.beginPath();
+    ctx.arc(scopeCenterX, scopeCenterY, scopeR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Garis mil-dot (scope reticle lines)
+    ctx.save();
+    ctx.translate(scopeCenterX, scopeCenterY);
+    ctx.rotate(G.scopeRotation);
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 1;
+
+    // Garis horizontal
+    for (let i = -5; i <= 5; i++) {
+        if (i === 0) continue;
+        const y = i * (scopeR / 5);
+        const dotLen = (i % 2 === 0) ? 8 : 5;
+        ctx.beginPath();
+        ctx.moveTo(-dotLen, y);
+        ctx.lineTo(dotLen, y);
+        ctx.stroke();
+    }
+    // Garis vertikal
+    for (let i = -5; i <= 5; i++) {
+        if (i === 0) continue;
+        const x = i * (scopeR / 5);
+        const dotLen = (i % 2 === 0) ? 8 : 5;
+        ctx.beginPath();
+        ctx.moveTo(x, -dotLen);
+        ctx.lineTo(x, dotLen);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+function drawCrosshair() {
+    const mx = mouse.x, my = mouse.y;
+    const wpn = WEAPONS[G.player.weapon];
+    const spread = 12 + (G.player.fireCooldown > 0 ? G.player.fireCooldown * 15 : 0);
+
+    // Garis crosshair - HD dengan glow
+    ctx.shadowColor = 'rgba(255,0,0,0.8)';
+    ctx.shadowBlur = 8;
+    ctx.strokeStyle = 'rgba(255,100,100,0.95)';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+
+    // Atas
+    ctx.beginPath();
+    ctx.moveTo(mx, my - spread - 10);
+    ctx.lineTo(mx, my - 4);
+    ctx.stroke();
+    // Bawah
+    ctx.beginPath();
+    ctx.moveTo(mx, my + 4);
+    ctx.lineTo(mx, my + spread + 10);
+    ctx.stroke();
+    // Kiri
+    ctx.beginPath();
+    ctx.moveTo(mx - spread - 10, my);
+    ctx.lineTo(mx - 4, my);
+    ctx.stroke();
+    // Kanan
+    ctx.beginPath();
+    ctx.moveTo(mx + 4, my);
+    ctx.lineTo(mx + spread + 10, my);
+    ctx.stroke();
+
+    // Titik tengah dengan glow
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(255,50,50,1)';
+    ctx.beginPath();
+    ctx.arc(mx, my, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    // Inner dot
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(mx, my, 1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Indikator hit zone (saat dekat musuh) - HD
+    const hitRadius = 30 / wpn.zoom;
+    let nearEnemy = false;
+    G.enemies.forEach(e => {
+        if (!e.alive) return;
+        if (Math.hypot(e.x - mx, e.y - my) < hitRadius) nearEnemy = true;
+    });
+    if (nearEnemy) {
+        ctx.shadowColor = 'rgba(255,50,50,0.8)';
+        ctx.shadowBlur = 6;
+        ctx.strokeStyle = 'rgba(255,80,80,0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(mx, my, hitRadius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+}
+
+/* ============================================================
+   GAME LOOP
+   ============================================================ */
+let lastTime = 0;
+function gameLoop(timestamp) {
+    const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+    lastTime = timestamp;
+
+    // Selalu render background bahkan di menu
+    if (G.state === 'menu') {
+        drawMenuBackground(timestamp);
+    } else {
+        update(dt);
+        render();
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Latar menu animasi
+let menuParticles = [];
+for (let i = 0; i < 40; i++) {
+    menuParticles.push({
+        x: Math.random() * 2000,
+        y: Math.random() * 2000,
+        vx: (Math.random() - 0.5) * 15,
+        vy: (Math.random() - 0.5) * 15,
+        size: 1 + Math.random() * 2,
+        alpha: 0.1 + Math.random() * 0.3
+    });
+}
+
+function drawMenuBackground(t) {
+    const time = t / 1000;
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#060a06');
+    grad.addColorStop(0.5, '#0a120a');
+    grad.addColorStop(1, '#050805');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Partikel mengambang
+    menuParticles.forEach(p => {
+        p.x += p.vx * 0.016;
+        p.y += p.vy * 0.016;
+        if (p.x < 0) p.x = W;
+        if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H;
+        if (p.y > H) p.y = 0;
+        ctx.fillStyle = `rgba(0,255,136,${p.alpha * (0.5 + Math.sin(time + p.x * 0.01) * 0.5)})`;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+    });
+
+    // Grid samar
+    ctx.strokeStyle = 'rgba(0,255,136,0.03)';
+    ctx.lineWidth = 1;
+    const gridSize = 60;
+    const offsetX = (time * 10) % gridSize;
+    for (let x = -gridSize + offsetX; x < W + gridSize; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, H);
+        ctx.stroke();
+    }
+    for (let y = 0; y < H; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
+    }
+}
+
+// Polyfill roundRect jika belum ada
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (typeof r === 'number') r = [r, r, r, r];
+        this.moveTo(x + r[0], y);
+        this.lineTo(x + w - r[1], y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r[1]);
+        this.lineTo(x + w, y + h - r[2]);
+        this.quadraticCurveTo(x + w, y + h, x + w - r[2], y + h);
+        this.lineTo(x + r[3], y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r[3]);
+        this.lineTo(x, y + r[0]);
+        this.quadraticCurveTo(x, y, x + r[0], y);
+        this.closePath();
+    };
+}
+
+// Mulai game loop
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
